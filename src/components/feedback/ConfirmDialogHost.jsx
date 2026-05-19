@@ -32,6 +32,7 @@ const ConfirmDialogHost = () => {
     cancelLabel = 'Cancel',
     severity = 'default',
     onConfirm,
+    onCancel,
   } = dialog;
 
   const handleConfirm = async () => {
@@ -42,7 +43,10 @@ const ConfirmDialogHost = () => {
     }
   };
 
-  const close = () => dispatch(closeConfirm());
+  const close = () => {
+    onCancel?.();
+    dispatch(closeConfirm());
+  };
 
   const isDanger = severity === 'danger';
 

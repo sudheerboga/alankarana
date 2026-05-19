@@ -18,7 +18,7 @@ const FAB = ({ icon = <AddRounded />, label = 'Add', onClick, ariaLabel }) => {
       style={{
         position: 'fixed',
         right: 16,
-        bottom: 'calc(72px + env(safe-area-inset-bottom, 0px))',
+        bottom: 'calc(88px + env(safe-area-inset-bottom, 0px))',
         zIndex: zIndex.fixed - 1,
       }}
     >
@@ -28,13 +28,16 @@ const FAB = ({ icon = <AddRounded />, label = 'Add', onClick, ariaLabel }) => {
         aria-label={ariaLabel || label}
         variant="extended"
         sx={{
-          backgroundColor: colors.primary,
+          backgroundColor: colors.text,
           color: colors.textInverse,
-          boxShadow: '0 8px 24px rgba(139, 26, 58, 0.4)',
-          '&:hover': { backgroundColor: colors.primaryHover },
+          boxShadow: '0 4px 16px rgba(16, 16, 26, 0.2)',
+          '&:hover': { backgroundColor: colors.text, boxShadow: '0 6px 20px rgba(16, 16, 26, 0.25)' },
           fontWeight: 600,
-          letterSpacing: '0.02em',
+          letterSpacing: '-0.005em',
           minHeight: 48,
+          borderRadius: '100px',
+          textTransform: 'none',
+          fontSize: 14,
         }}
       >
         {icon}

@@ -49,14 +49,8 @@ export const useUnsavedChangesGuard = (formId, isDirty) => {
         cancelLabel: 'Stay',
         severity: 'danger',
         onConfirm: () => blocker.proceed(),
+        onCancel: () => blocker.reset(),
       })
     );
-
-    // If user dismisses the confirm (cancel/escape), the blocker stays 'blocked'.
-    // Reset it after a short delay so future nav attempts can fire fresh.
-    const t = setTimeout(() => {
-      if (blocker.state === 'blocked') blocker.reset();
-    }, 100);
-    return () => clearTimeout(t);
   }, [blocker, dispatch]);
 };

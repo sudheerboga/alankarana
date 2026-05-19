@@ -23,19 +23,20 @@ const EmptyState = ({
     >
       <Box
         sx={{
-          width: 72, height: 72,
-          borderRadius: '50%',
+          width: 56, height: 56,
+          borderRadius: 3,
           backgroundColor: colors.surfaceAlt,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: colors.textMuted,
+          color: colors.textSecondary,
         }}
       >
-        <Icon sx={{ fontSize: 36 }} />
+        <Icon sx={{ fontSize: 28 }} />
       </Box>
       <Typography
         sx={{
-          fontFamily: typography.fontDisplay,
-          fontSize: 20,
+          fontSize: 17,
+          fontWeight: 600,
+          letterSpacing: '-0.02em',
           color: colors.text,
           mt: 0.5,
         }}
@@ -43,7 +44,7 @@ const EmptyState = ({
         {title}
       </Typography>
       {description && (
-        <Typography sx={{ fontSize: 14, color: colors.textSecondary, maxWidth: 280, lineHeight: 1.6 }}>
+        <Typography sx={{ fontSize: 14, color: colors.textSecondary, maxWidth: 300, lineHeight: 1.55 }}>
           {description}
         </Typography>
       )}

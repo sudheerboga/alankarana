@@ -1,6 +1,39 @@
 import { useEffect, useState, useRef, useMemo } from 'react';
-import { onSnapshot } from 'firebase/firestore';
+import { onSnapshot, Timestamp } from 'firebase/firestore';
 import { buildQuery, snapshotToList } from '../firebase/queries';
+
+/**
+ * Stable string key for a query spec.
+ *
+ * IMPORTANT: We cannot use JSON.stringify directly on the spec because
+ * Firestore Timestamps have non-enumerable properties — they serialize to "{}".
+ * That would collapse different date ranges to the same key (or worse,
+ * round-trip back as empty objects if we tried JSON.parse) and break date filtering
+ * across Sales, Expenses, Reports, and Dashboard.
+ *
+ * Instead, we walk the spec and replace Timestamp instances with their millis,
+ * then stringify. This gives us a stable, change-detecting key — without
+ * destroying the original Timestamps we pass to Firestore.
+ */
+const specToKey = (spec) => {
+  if (!spec) return '{}';
+  const normalize = (v) => {
+    if (v == null) return v;
+    if (v instanceof Timestamp) return { __ts: v.toMillis() };
+    if (Array.isArray(v)) return v.map(normalize);
+    if (typeof v === 'object') {
+      const out = {};
+      for (const k of Object.keys(v)) out[k] = normalize(v[k]);
+      return out;
+    }
+    return v;
+  };
+  try {
+    return JSON.stringify(normalize(spec));
+  } catch {
+    return Math.random().toString();
+  }
+};
 
 /**
  * Subscribe to a Firestore collection (or filtered query).
@@ -19,10 +52,13 @@ export const useCollection = (collectionName, spec, { enabled = true } = {}) => 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Serialize the spec to a stable key so callers can pass inline objects.
-  // JSON.stringify is fine here — specs are small + flat.
-  const specKey = useMemo(() => JSON.stringify(spec ?? {}), [spec]);
-  const stableSpec = useMemo(() => JSON.parse(specKey), [specKey]);
+  // Stable cache key for the effect dependency — handles Timestamps correctly.
+  const specKey = useMemo(() => specToKey(spec), [spec]);
+
+  // Keep the *live* spec (with real Timestamp instances) in a ref so the effect
+  // can read it without re-running on every render.
+  const specRef = useRef(spec);
+  specRef.current = spec;
 
   // Track the latest unsubscribe to avoid race on rapid spec changes
   const unsubRef = useRef(null);
@@ -35,7 +71,7 @@ export const useCollection = (collectionName, spec, { enabled = true } = {}) => 
     setLoading(true);
     setError(null);
 
-    const q = buildQuery(collectionName, stableSpec);
+    const q = buildQuery(collectionName, specRef.current);
 
     unsubRef.current?.();
     unsubRef.current = onSnapshot(
@@ -56,7 +92,8 @@ export const useCollection = (collectionName, spec, { enabled = true } = {}) => 
       unsubRef.current?.();
       unsubRef.current = null;
     };
-  }, [collectionName, stableSpec, enabled]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [collectionName, specKey, enabled]);
 
   return { items, loading, error };
 };

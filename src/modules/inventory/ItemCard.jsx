@@ -1,4 +1,4 @@
-import { Box, Card, Typography, Chip } from '@mui/material';
+import { Box, Card, Typography } from '@mui/material';
 import { Inventory2Outlined } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -9,12 +9,12 @@ import { cldUrl } from '../../services/cloudinary';
 
 const STATUS_COPY = {
   [STOCK_STATUS.IN_STOCK]: { label: 'In stock', color: 'success' },
-  [STOCK_STATUS.LOW]: { label: 'Low stock', color: 'warning' },
-  [STOCK_STATUS.OUT]: { label: 'Out of stock', color: 'danger' },
+  [STOCK_STATUS.LOW]: { label: 'Low', color: 'warning' },
+  [STOCK_STATUS.OUT]: { label: 'Out', color: 'danger' },
 };
 
 const ItemCard = ({ item, onClick, index = 0 }) => {
-  const { colors, typography } = useTheme();
+  const { colors } = useTheme();
   const navigate = useNavigate();
 
   const handleClick = () => {
@@ -24,10 +24,8 @@ const ItemCard = ({ item, onClick, index = 0 }) => {
 
   const status = getStockStatus(item.remainingPieces ?? 0);
   const statusCopy = STATUS_COPY[status];
-  const statusBg = colors[`${statusCopy.color}Bg`];
   const statusFg = colors[statusCopy.color];
 
-  // Use first image or fallback
   const img = item.images?.[0];
   const imgUrl = img?.publicId
     ? cldUrl(img.publicId, { width: 200, height: 200 })
@@ -44,8 +42,8 @@ const ItemCard = ({ item, onClick, index = 0 }) => {
         sx={{
           display: 'flex',
           alignItems: 'stretch',
-          gap: 1.5,
-          p: 1.5,
+          gap: 2,
+          p: 1.75,
           cursor: 'pointer',
           transition: 'all 0.15s ease',
           '&:active': { transform: 'scale(0.99)' },
@@ -55,9 +53,9 @@ const ItemCard = ({ item, onClick, index = 0 }) => {
         {/* Image */}
         <Box
           sx={{
-            width: 72, height: 72,
+            width: 64, height: 64,
             flexShrink: 0,
-            borderRadius: 1.5,
+            borderRadius: 2,
             backgroundColor: colors.surfaceAlt,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             color: colors.textMuted,
@@ -67,70 +65,40 @@ const ItemCard = ({ item, onClick, index = 0 }) => {
             backgroundPosition: 'center',
           }}
         >
-          {!imgUrl && <Inventory2Outlined sx={{ fontSize: 28 }} />}
+          {!imgUrl && <Inventory2Outlined sx={{ fontSize: 24 }} />}
         </Box>
 
         {/* Content */}
-        <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-          <Box>
-            <Typography
-              sx={{
-                fontSize: 15,
-                fontWeight: 600,
-                color: colors.text,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {item.itemName}
-            </Typography>
-            <Typography
-              sx={{
-                fontSize: 11,
-                color: colors.textMuted,
-                fontFamily: typography.fontMono,
-                letterSpacing: '0.02em',
-                mt: 0.25,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-            >
+        <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 0.5 }}>
+          <Typography
+            sx={{
+              fontSize: 15,
+              fontWeight: 600,
+              color: colors.text,
+              letterSpacing: '-0.01em',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {item.itemName}
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+            <Typography sx={{ fontSize: 12, color: colors.textMuted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {item.itemCode}
             </Typography>
-          </Box>
-
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 0.5 }}>
-            <Typography
-              sx={{
-                fontSize: 15,
-                fontWeight: 600,
-                color: colors.primary,
-                fontFamily: typography.fontDisplay,
-              }}
-            >
-              {formatINR(item.sellingPricePerPiece)}
+            <Box sx={{ width: 3, height: 3, borderRadius: '50%', backgroundColor: colors.textMuted, flexShrink: 0 }} />
+            <Typography sx={{ fontSize: 12, color: statusFg, fontWeight: 600 }}>
+              {statusCopy.label} · {item.remainingPieces ?? 0}
             </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-              <Typography sx={{ fontSize: 12, color: colors.textSecondary }}>
-                {item.remainingPieces ?? 0} left
-              </Typography>
-              <Chip
-                size="small"
-                label={statusCopy.label}
-                sx={{
-                  height: 20,
-                  fontSize: 10,
-                  fontWeight: 600,
-                  backgroundColor: statusBg,
-                  color: statusFg,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                }}
-              />
-            </Box>
           </Box>
+        </Box>
+
+        {/* Price */}
+        <Box sx={{ textAlign: 'right', display: 'flex', flexDirection: 'column', justifyContent: 'center', flexShrink: 0 }}>
+          <Typography sx={{ fontSize: 16, fontWeight: 700, color: colors.text, letterSpacing: '-0.02em' }}>
+            {formatINR(item.sellingPricePerPiece)}
+          </Typography>
         </Box>
       </Card>
     </motion.div>

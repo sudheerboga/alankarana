@@ -13,7 +13,7 @@ const StickySearch = ({
   placeholder = 'Search…',
   onFilterClick,
   hasActiveFilters = false,
-  topOffset = 56,  // top of TopBar
+  topOffset = 64,  // top of TopBar
 }) => {
   const { colors, zIndex } = useTheme();
   const [local, setLocal] = useState(value || '');
@@ -41,8 +41,7 @@ const StickySearch = ({
         top: topOffset,
         zIndex: zIndex.sticky,
         backgroundColor: colors.bg,
-        px: 2, py: 1.5,
-        borderBottom: `1px solid ${colors.border}`,
+        px: 2, py: 1,
       }}
     >
       <Paper
@@ -51,10 +50,12 @@ const StickySearch = ({
           display: 'flex',
           alignItems: 'center',
           gap: 0.5,
-          px: 1.5, py: 0.5,
+          px: 2, py: 0.5,
           backgroundColor: colors.surface,
           border: `1px solid ${colors.border}`,
           borderRadius: 999,
+          transition: 'border-color 0.15s ease',
+          '&:focus-within': { borderColor: colors.text },
         }}
       >
         <SearchRounded sx={{ color: colors.textMuted, fontSize: 20 }} />

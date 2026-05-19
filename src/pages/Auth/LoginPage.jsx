@@ -144,7 +144,7 @@ const LoginPage = () => {
               textTransform: 'uppercase',
               mt: 0.5,
             }}>
-              Boutique Management
+              {/* Boutique Management */}
             </Typography>
           </Box>
 

@@ -90,12 +90,65 @@ src/
 - **Common components**: `EmptyState`, `StickySearch` (debounced), `FAB`, `ImagePicker`, `CategorySelect`
 - Cleaner rewrite of `useUnsavedChangesGuard` blocker handling
 
-### 🚧 Coming next
-- **Round 4**: Sales module — search-item-then-sell flow, atomic stock decrement via Firestore transaction, sale history, payment types, customer name
-- **Round 5**: Expenses + bulk purchase tracking (vendors)
-- **Round 6**: Reports module
-- **Round 7**: Requests, settings, categories management
-- **Round 8**: Offline sync queue, dashboard with real stats, polish
+### ✅ Rounds 4-8 — Sales, Expenses, Reports, Requests, Settings, Dashboard (this commit)
+
+**Sales (Round 4)**
+- New Sale page: item picker (autocomplete by name/code), qty, actual price (defaults to item's selling price but editable), discount, customer name, payment type, notes
+- **Atomic Firestore transaction**: reads stock, checks availability, writes sale + decrements stock in one commit — no race conditions
+- Live profit/loss preview as you type
+- Sales list page: today/week/month/custom date filter, summary card (revenue + profit), reverse-sale option (restores stock atomically)
+- `SaleCard` component with payment-type chip, profit/loss indicator
+
+**Expenses (Round 5)**
+- Add expense form: type, amount, date picker, optional bill photo, notes
+- Bulk purchase toggle: shows vendor name + bill number fields for wholesale tracking
+- Draft auto-save + unsaved-changes guard
+- Expenses list: date filter, type icons, summary with top-3 category breakdown
+
+**Reports (Round 6)**
+- 4 tabs: Overview, Sales, Expenses, Inventory
+- Net P&L card (sale profit minus expenses)
+- Pure-SVG bar chart (no extra library) for revenue trend
+- Top categories with progress bars
+- Best-selling items list
+- Expense breakdown with progress bars
+- Inventory snapshot (stock value, low/out counts)
+
+**Requests (Round 7)**
+- Quick-add field at top, no separate page
+- 3 tabs: Pending / Completed / All
+- Tap checkbox to toggle complete (with strikethrough animation)
+- Optional category tag, customer name
+
+**Settings (Round 7)**
+- Profile card with avatar, name, role
+- Manage section: Categories, Vendors, Customer Requests
+- Theme toggle (dark mode switch)
+- About / version
+- Sign-out with confirmation
+
+**Categories management**
+- List all (default + custom)
+- Add new with inline dialog
+- Delete custom only (defaults are protected)
+
+**Vendors management**
+- Full CRUD with name, phone, address, notes
+- Linked from bulk purchase entry
+
+**Dashboard (Round 8)**
+- Today's sales hero ("₹X earned" or "Ready when you are")
+- 4 stat cards: today sales, profit, stock value, monthly expenses — all tappable
+- Primary "Record a sale" CTA
+- Low-stock alert section (linked to item details)
+- Recent sales today
+- Best-sellers this week (top 3 with rank badges)
+- Pending customer requests teaser
+
+### What's intentionally NOT in this commit
+- **Offline write queue**: Firestore's built-in offline persistence handles most cases automatically — writes queue when offline and sync when reconnected. A custom queue would be needed only for image uploads (Cloudinary doesn't queue). If you need this, ping me.
+- **Virtualized lists**: not yet needed at boutique scale (~hundreds of items). When you cross 2-3k items, add `react-window` to the inventory list.
+- **PDF / Excel export from reports**: not in spec; easy to add later.
 
 ## Design Tokens
 

@@ -1,95 +1,97 @@
-// Centralized design tokens — change here, change everywhere.
-// Inspired by premium ethnic fashion & jewellery: warm cream, deep maroon, antique gold.
+// Modern minimal tokens — lots of whitespace, neutral canvas, maroon + gold as accents.
+// Aesthetic: clean fintech meets premium boutique. Inspired by Linear, Cred, Apple.
 
 export const palette = {
   light: {
-    // Brand
-    primary: '#8B1A3A',        // Deep maroon — sarees, traditional luxury
-    primaryHover: '#6E1430',
-    primaryLight: '#C4456B',
-    accent: '#C9A961',         // Antique gold — jewellery
-    accentHover: '#A88845',
+    // Brand (used sparingly — accents only, never as page background)
+    primary: '#8B1A3A',         // Deep maroon — primary CTAs, key numbers
+    primaryHover: '#701429',
+    primaryLight: '#FBEEF1',    // Tinted background for selected/active states
+    accent: '#B8924E',          // Antique gold — secondary highlights
+    accentHover: '#9A7A40',
+    accentLight: '#FBF6EC',
 
-    // Surfaces
-    bg: '#FBF7F2',             // Warm cream — main background
+    // Neutral canvas — generous whitespace, near-white
+    bg: '#FAFAF7',              // Off-white with the faintest warm undertone
     surface: '#FFFFFF',
-    surfaceAlt: '#F5E6D3',     // Champagne — cards, elevated
-    surfaceMuted: '#EFE6DA',
+    surfaceAlt: '#F4F4F1',      // Subtle card differentiation
+    surfaceMuted: '#EDEDE9',
 
-    // Text
-    text: '#2A1810',           // Deep chocolate — main text
-    textSecondary: '#6B5544',
-    textMuted: '#9A8674',
+    // Text — strong contrast hierarchy
+    text: '#16161A',            // Near-black, not pure black (softer)
+    textSecondary: '#5C5C66',
+    textMuted: '#9090A0',
     textInverse: '#FFFFFF',
 
-    // Borders
-    border: '#E5D5C0',
-    borderStrong: '#C9B59A',
+    // Borders — almost invisible, just enough
+    border: '#EAEAE6',
+    borderStrong: '#D8D8D4',
 
-    // Status
-    success: '#2D6A4F',
-    successBg: '#D8F3DC',
-    warning: '#B8860B',
-    warningBg: '#FFF4D6',
-    danger: '#A4243B',
-    dangerBg: '#FCE4E8',
-    info: '#1B6B93',
-    infoBg: '#D6EAF8',
+    // Status — muted, refined
+    success: '#0F7A4D',
+    successBg: '#E8F5EE',
+    warning: '#9C6F00',
+    warningBg: '#FFF7E0',
+    danger: '#B42143',
+    dangerBg: '#FCEBEF',
+    info: '#1E5A8C',
+    infoBg: '#E5F1FA',
 
-    // Misc
-    overlay: 'rgba(42, 24, 16, 0.5)',
-    shimmer: 'rgba(201, 169, 97, 0.1)',
+    overlay: 'rgba(22, 22, 26, 0.55)',
+    shimmer: 'rgba(139, 26, 58, 0.06)',
   },
   dark: {
-    primary: '#D4506F',
-    primaryHover: '#E27090',
-    primaryLight: '#F08CA8',
-    accent: '#D4B871',
-    accentHover: '#E0C885',
+    primary: '#E26E8F',
+    primaryHover: '#EC8AA7',
+    primaryLight: '#2B1620',
+    accent: '#D9B870',
+    accentHover: '#E5C887',
+    accentLight: '#2A2418',
 
-    bg: '#1A1410',
-    surface: '#252019',
-    surfaceAlt: '#2F2820',
-    surfaceMuted: '#3A3128',
+    bg: '#0E0E11',
+    surface: '#161619',
+    surfaceAlt: '#1E1E22',
+    surfaceMuted: '#26262B',
 
-    text: '#F5EFE6',
-    textSecondary: '#C7B8A6',
-    textMuted: '#8B7B68',
-    textInverse: '#1A1410',
+    text: '#F5F5F2',
+    textSecondary: '#B0B0B8',
+    textMuted: '#70707C',
+    textInverse: '#16161A',
 
-    border: '#3D3328',
-    borderStrong: '#52443A',
+    border: '#26262B',
+    borderStrong: '#3A3A40',
 
-    success: '#52B788',
-    successBg: '#1B3A2B',
-    warning: '#E0B341',
-    warningBg: '#3D2F0F',
-    danger: '#E27090',
-    dangerBg: '#3A1820',
-    info: '#5DADE2',
-    infoBg: '#0F2A3D',
+    success: '#4FAE7F',
+    successBg: '#0F2A1E',
+    warning: '#D9A536',
+    warningBg: '#2B2008',
+    danger: '#EC6685',
+    dangerBg: '#2B1018',
+    info: '#5FA8DC',
+    infoBg: '#0A1F2E',
 
-    overlay: 'rgba(0, 0, 0, 0.7)',
-    shimmer: 'rgba(212, 184, 113, 0.08)',
+    overlay: 'rgba(0, 0, 0, 0.75)',
+    shimmer: 'rgba(226, 110, 143, 0.05)',
   },
 };
 
 export const typography = {
-  fontDisplay: "'Cormorant Garamond', Georgia, serif", // Headings — elegant serif
+  // Single, clean sans-serif everywhere. Display variant uses tighter tracking + heavier weight.
+  fontDisplay: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
   fontBody: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
-  fontMono: "'SF Mono', Menlo, Consolas, monospace",
+  fontMono: "'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace",
 
   size: {
-    xs: '12px',
+    xs: '11px',
     sm: '13px',
-    base: '15px',  // Larger than 14px default — easier on mobile
-    md: '16px',
-    lg: '18px',
+    base: '14px',
+    md: '15px',
+    lg: '17px',
     xl: '20px',
     '2xl': '24px',
-    '3xl': '30px',
-    '4xl': '36px',
-    '5xl': '48px',
+    '3xl': '32px',
+    '4xl': '40px',
+    '5xl': '56px',
   },
   weight: {
     regular: 400,
@@ -98,18 +100,21 @@ export const typography = {
     bold: 700,
   },
   lineHeight: {
-    tight: 1.2,
+    tight: 1.15,
+    snug: 1.3,
     normal: 1.5,
     relaxed: 1.7,
   },
   letterSpacing: {
+    tighter: '-0.04em',
     tight: '-0.02em',
     normal: '0',
-    wide: '0.05em',
-    wider: '0.1em',
+    wide: '0.04em',
+    wider: '0.08em',
   },
 };
 
+// Generous spacing — minimalism = breathing room
 export const spacing = {
   0: '0',
   1: '4px',
@@ -120,38 +125,39 @@ export const spacing = {
   6: '24px',
   7: '32px',
   8: '40px',
-  9: '48px',
-  10: '64px',
-  11: '80px',
-  12: '96px',
+  9: '56px',
+  10: '72px',
+  11: '96px',
+  12: '128px',
 };
 
+// Modern radius — soft but not playful
 export const radius = {
   none: '0',
-  sm: '6px',
-  md: '10px',
-  lg: '14px',
+  sm: '8px',
+  md: '12px',
+  lg: '16px',
   xl: '20px',
   '2xl': '28px',
   full: '9999px',
 };
 
+// Almost no shadows — use borders for separation instead. This is the minimal look.
 export const shadow = {
   none: 'none',
-  sm: '0 1px 2px rgba(42, 24, 16, 0.06)',
-  md: '0 4px 12px rgba(42, 24, 16, 0.08)',
-  lg: '0 8px 24px rgba(42, 24, 16, 0.10)',
-  xl: '0 16px 48px rgba(42, 24, 16, 0.14)',
-  inset: 'inset 0 1px 2px rgba(42, 24, 16, 0.06)',
-  // Luxury — subtle gold tint for premium cards
-  premium: '0 4px 16px rgba(201, 169, 97, 0.18), 0 1px 3px rgba(42, 24, 16, 0.06)',
+  sm: '0 1px 2px rgba(16, 16, 26, 0.04)',
+  md: '0 2px 8px rgba(16, 16, 26, 0.05)',
+  lg: '0 8px 24px rgba(16, 16, 26, 0.08)',
+  xl: '0 16px 40px rgba(16, 16, 26, 0.12)',
+  inset: 'inset 0 1px 2px rgba(16, 16, 26, 0.04)',
+  premium: '0 4px 16px rgba(139, 26, 58, 0.12)', // For the rare elevated CTA
 };
 
 export const motion = {
   duration: {
     fast: 0.15,
-    normal: 0.25,
-    slow: 0.4,
+    normal: 0.22,
+    slow: 0.35,
   },
   easing: {
     standard: [0.4, 0, 0.2, 1],
@@ -161,7 +167,6 @@ export const motion = {
   },
 };
 
-// Breakpoints — mobile first
 export const breakpoint = {
   sm: '480px',
   md: '768px',
@@ -169,7 +174,6 @@ export const breakpoint = {
   xl: '1280px',
 };
 
-// z-index scale
 export const zIndex = {
   base: 0,
   dropdown: 100,
@@ -181,5 +185,4 @@ export const zIndex = {
   tooltip: 700,
 };
 
-// Touch target minimum (Apple HIG / Material) — critical for mobile UX
 export const touchTarget = '44px';

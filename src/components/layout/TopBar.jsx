@@ -1,12 +1,11 @@
 import { AppBar, Toolbar, IconButton, Typography, Box } from '@mui/material';
 import {
   ArrowBackRounded,
-  LightModeRounded,
-  DarkModeRounded,
-  MoreVertRounded,
+  MenuRounded,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../theme/ThemeProvider';
+import { useMoreDrawer } from './MoreSidebar';
 
 /**
  * Universal top bar. Pass `back` to show a back button, `actions` for trailing icons.
@@ -14,7 +13,8 @@ import { useTheme } from '../../theme/ThemeProvider';
  */
 const TopBar = ({ title, back = false, onBack, actions = null, transparent = false }) => {
   const navigate = useNavigate();
-  const { colors, mode, toggleMode, typography, zIndex } = useTheme();
+  const { colors, typography, zIndex } = useTheme();
+  const moreDrawer = useMoreDrawer();
 
   const handleBack = () => {
     if (onBack) return onBack();
@@ -48,20 +48,22 @@ const TopBar = ({ title, back = false, onBack, actions = null, transparent = fal
             fontSize: typography.size['2xl'],
             fontWeight: 600,
             letterSpacing: '0.02em',
-            color: colors.text,
+            color: colors.primary,
           }}
         >
           {title}
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
           {actions}
-          <IconButton
-            onClick={toggleMode}
-            aria-label="Toggle theme"
-            sx={{ color: colors.textSecondary }}
-          >
-            {mode === 'light' ? <DarkModeRounded fontSize="small" /> : <LightModeRounded fontSize="small" />}
-          </IconButton>
+          {moreDrawer && (
+            <IconButton
+              onClick={() => moreDrawer.setOpen(true)}
+              aria-label="Open menu"
+              sx={{ color: colors.text }}
+            >
+              <MenuRounded />
+            </IconButton>
+          )}
         </Box>
       </Toolbar>
     </AppBar>

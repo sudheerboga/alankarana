@@ -2,6 +2,7 @@ import { Outlet } from 'react-router-dom';
 import { Box } from '@mui/material';
 import BottomNav from '../components/layout/BottomNav';
 import OfflineIndicator from '../components/feedback/OfflineIndicator';
+import { MoreSidebarProvider } from '../components/layout/MoreSidebar';
 import { useTheme } from '../theme/ThemeProvider';
 
 /**
@@ -13,26 +14,28 @@ const AppLayout = () => {
   const { colors } = useTheme();
 
   return (
-    <Box
-      sx={{
-        minHeight: '100dvh',
-        backgroundColor: colors.bg,
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      <OfflineIndicator />
+    <MoreSidebarProvider>
       <Box
-        component="main"
         sx={{
-          flex: 1,
-          paddingBottom: 'calc(64px + env(safe-area-inset-bottom, 0px))',
+          minHeight: '100dvh',
+          backgroundColor: colors.bg,
+          display: 'flex',
+          flexDirection: 'column',
         }}
       >
-        <Outlet />
+        <OfflineIndicator />
+        <Box
+          component="main"
+          sx={{
+            flex: 1,
+            paddingBottom: 'calc(72px + env(safe-area-inset-bottom, 0px))',
+          }}
+        >
+          <Outlet />
+        </Box>
+        <BottomNav />
       </Box>
-      <BottomNav />
-    </Box>
+    </MoreSidebarProvider>
   );
 };
 

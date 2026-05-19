@@ -152,7 +152,7 @@ const ItemFormPage = ({ mode = 'create' }) => {
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
           <Stack spacing={2}>
             {/* Photos */}
-            <Card sx={{ p: 2 }}>
+            {/* <Card sx={{ p: 2 }}>
               <Controller
                 name="images"
                 control={control}
@@ -160,7 +160,7 @@ const ItemFormPage = ({ mode = 'create' }) => {
                   <ImagePicker value={field.value} onChange={field.onChange} folder="products" />
                 )}
               />
-            </Card>
+            </Card> */}
 
             {/* Basic info */}
             <Card sx={{ p: 2 }}>
@@ -277,7 +277,7 @@ const ItemFormPage = ({ mode = 'create' }) => {
               </Typography>
               <Stack spacing={2}>
                 <Box sx={{ display: 'flex', gap: 2 }}>
-                  <Controller
+                  {/* <Controller
                     name="setQuantity"
                     control={control}
                     render={({ field }) => (
@@ -290,7 +290,7 @@ const ItemFormPage = ({ mode = 'create' }) => {
                     render={({ field }) => (
                       <TextField {...field} label="Per set" type="number" fullWidth inputProps={{ inputMode: 'numeric', min: 1 }} />
                     )}
-                  />
+                  /> */}
                   <Controller
                     name="totalPieces"
                     control={control}
@@ -371,6 +371,8 @@ const ItemFormPage = ({ mode = 'create' }) => {
           backgroundColor: colors.surface,
           borderTop: `1px solid ${colors.border}`,
           boxShadow: '0 -4px 16px rgba(0,0,0,0.05)',
+          paddingBottom: '2.5rem',
+          zIndex: 1,
         }}
       >
         <Button

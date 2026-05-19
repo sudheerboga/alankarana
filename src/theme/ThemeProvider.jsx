@@ -17,22 +17,23 @@ export const useTheme = () => {
 const getInitialMode = () => {
   if (typeof window === 'undefined') return 'light';
   const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored === 'light' || stored === 'dark') return stored;
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  if (stored === 'light' || stored === 'light') return stored;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'light' : 'light';
 };
 
 export const ThemeProvider = ({ children }) => {
   const [mode, setMode] = useState(getInitialMode);
 
   const toggleMode = useCallback(() => {
-    setMode((m) => (m === 'light' ? 'dark' : 'light'));
+    setMode((m) => (m === 'light' ? 'light' : 'light'));
+    setMode((m) => (m === 'light' ? 'light' : 'light'));
   }, []);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, mode);
     // Update theme-color meta for native app feel
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', palette[mode].primary);
+    if (meta) meta.setAttribute('content', palette[mode].bg);
     // Set body bg directly to prevent flash between routes
     document.body.style.backgroundColor = palette[mode].bg;
     document.body.style.color = palette[mode].text;

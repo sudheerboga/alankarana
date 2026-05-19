@@ -3,67 +3,62 @@
 *, *::before, *::after { box-sizing: border-box; }
 
 html {
-  /* Disable iOS auto text resize on rotate */
   -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
-  min-height: 100dvh; /* Dynamic viewport — handles mobile address bar */
+  min-height: 100dvh;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11'; /* Inter alt forms — refined look */
 }
 
-/* Respect safe areas (notch, home indicator) */
 :root {
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
-  --bottom-nav-height: 64px;
+  --bottom-nav-height: 72px;
 }
 
 button, input, select, textarea {
   font-family: inherit;
 }
 
-/* Disable double-tap zoom on buttons */
-button {
-  touch-action: manipulation;
-}
+button { touch-action: manipulation; }
 
-/* Subtle scrollbars on desktop */
-::-webkit-scrollbar { width: 8px; height: 8px; }
+/* Minimal scrollbars */
+::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-borderStrong, #C9B59A);
-  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 100px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
 }
 
-/* Remove tap highlight on iOS */
 a, button { -webkit-tap-highlight-color: transparent; }
 
-/* Image defaults */
 img { max-width: 100%; height: auto; display: block; }
 
-/* Focus ring — accessible but elegant */
+/* Accessible focus ring */
 :focus-visible {
   outline: 2px solid var(--color-primary, #8B1A3A);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
-/* Skeleton shimmer keyframe — used across loading states */
+/* Skeleton shimmer */
 @keyframes shimmer {
   0% { background-position: -200px 0; }
   100% { background-position: calc(200px + 100%) 0; }
 }
 
-/* Page transition root */
 .page-root {
   min-height: calc(100dvh - var(--bottom-nav-height) - var(--safe-bottom));
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
-
-/* Prevent layout shift on font load */
-.font-display { font-family: 'Cormorant Garamond', Georgia, serif; }
-.font-body { font-family: 'Inter', -apple-system, sans-serif; }
