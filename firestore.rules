@@ -1,0 +1,91 @@
+rules_version = '2';
+
+// Alankarana Firestore security rules.
+// Deploy with: firebase deploy --only firestore:rules
+//
+// Model:
+//  - All access requires authentication.
+//  - User's role is stored on their /users/{uid} doc.
+//  - Admins can do anything. Staff can create sales + read inventory.
+//    Accountants can read everything + write expenses. Tighten as needed.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function userProfile() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && userProfile().role == 'admin' && userProfile().active == true;
+    }
+
+    function isStaff() {
+      return isSignedIn() && userProfile().role in ['admin', 'staff', 'accountant'] && userProfile().active == true;
+    }
+
+    function isAccountant() {
+      return isSignedIn() && userProfile().role in ['admin', 'accountant'] && userProfile().active == true;
+    }
+
+    // Users — admins manage; users can read/update their own
+    match /users/{uid} {
+      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      // Allow self-create on first sign-in (admin bootstrap)
+      allow create: if isSignedIn() && request.auth.uid == uid;
+      allow update: if isAdmin() || (isSignedIn() && request.auth.uid == uid && request.resource.data.role == resource.data.role);
+      allow delete: if isAdmin();
+    }
+
+    // Categories — staff can read, admins manage
+    match /categories/{id} {
+      allow read: if isStaff();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Inventory — staff can read, admins write
+    match /inventory/{id} {
+      allow read: if isStaff();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Sales — staff can create + read, admins can delete
+    match /sales/{id} {
+      allow read: if isStaff();
+      allow create: if isStaff();
+      allow update, delete: if isAdmin();
+    }
+
+    // Expenses — accountants + admins
+    match /expenses/{id} {
+      allow read: if isStaff();
+      allow create, update: if isAccountant();
+      allow delete: if isAdmin();
+    }
+
+    // Out-of-stock requests — all staff
+    match /requestedItems/{id} {
+      allow read, write: if isStaff();
+    }
+
+    // Vendors — admins manage
+    match /vendors/{id} {
+      allow read: if isStaff();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Settings — admins only
+    match /settings/{id} {
+      allow read: if isStaff();
+      allow write: if isAdmin();
+    }
+
+    // Reports cache — admins only
+    match /reportsCache/{id} {
+      allow read, write: if isAdmin();
+    }
+  }
+}
