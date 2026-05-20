@@ -134,7 +134,15 @@ const DashboardPage = () => {
   );
 
   const todayStats = useMemo(() => aggregateSales(todaySales), [todaySales]);
-  const expenseTotal = useMemo(() => monthExpenses.reduce((s, e) => s + (e.amount || 0), 0), [monthExpenses]);
+  // Only operating expenses (fuel, food, misc) — bulk purchases excluded because
+  // their cost is already captured in each sale's costPerPiece → profit.
+  const INVENTORY_EXPENSE_TYPES = new Set(['textile-purchase', 'jewellery-purchase']);
+  const expenseTotal = useMemo(
+    () => monthExpenses
+      .filter((e) => !e.isBulkPurchase && !INVENTORY_EXPENSE_TYPES.has(e.type))
+      .reduce((s, e) => s + (e.amount || 0), 0),
+    [monthExpenses]
+  );
   const invSummary = useMemo(() => summarizeInventory(inventory), [inventory]);
   const bestThisWeek = useMemo(() => bestSellingItems(weekSales, 3), [weekSales]);
 
@@ -232,7 +240,7 @@ const DashboardPage = () => {
             <StatTile
               label="EXPENSES · 30D"
               value={formatINR(expenseTotal, { compact: true })}
-              sublabel={`${monthExpenses.length} entries`}
+              sublabel="Operating only"
               onClick={() => navigate(ROUTES.EXPENSES)}
             />
           </Box>

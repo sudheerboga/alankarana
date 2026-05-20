@@ -225,6 +225,8 @@ const ExpenseFormPage = () => {
           p: 2,
           backgroundColor: colors.surface,
           borderTop: `1px solid ${colors.border}`,
+          pb: '2.5rem',
+          zIndex: 1,
         }}
       >
         <Button

@@ -130,14 +130,37 @@ export const expensesByType = (expenses = []) => {
 };
 
 /**
- * Profit/loss summary — net of sales profit minus expenses.
+ * Profit/loss summary.
+ *
+ * Bulk purchase expenses (textile-purchase, jewellery-purchase, isBulkPurchase)
+ * are intentionally EXCLUDED from the net calculation because their cost is
+ * already captured per-sale via costPerPiece → totalCost → profit.
+ * Including them would double-count the inventory cost.
+ *
+ * Only operating expenses (fuel, food, travel, misc) reduce net profit.
  */
 export const netProfitLoss = (sales = [], expenses = []) => {
+  const INVENTORY_TYPES = new Set(['textile-purchase', 'jewellery-purchase']);
+
+  const isInventoryExpense = (e) =>
+    e.isBulkPurchase || INVENTORY_TYPES.has(e.type);
+
   const saleProfit = aggregateSales(sales).profit;
-  const totalExpense = expenses.reduce((sum, e) => sum + toNumber(e.amount), 0);
+
+  let operatingExpenses = 0;
+  let inventoryExpenses = 0;
+
+  for (const e of expenses) {
+    const amt = toNumber(e.amount);
+    if (isInventoryExpense(e)) inventoryExpenses += amt;
+    else operatingExpenses += amt;
+  }
+
   return {
     saleProfit,
-    totalExpense,
-    net: saleProfit - totalExpense,
+    operatingExpenses,
+    inventoryExpenses,
+    totalExpense: operatingExpenses + inventoryExpenses,
+    net: saleProfit - operatingExpenses,
   };
 };

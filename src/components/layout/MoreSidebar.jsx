@@ -4,7 +4,7 @@ import {
   ListItemIcon, ListItemText, Typography, Divider,
 } from '@mui/material';
 import {
-  ReceiptLongRounded, AssessmentRounded, RecordVoiceOverRounded,
+  ReceiptRounded, ReceiptLongRounded, AssessmentRounded, RecordVoiceOverRounded,
   SettingsRounded, CategoryRounded, StorefrontRounded, CloseRounded,
 } from '@mui/icons-material';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -12,6 +12,7 @@ import { useTheme } from '../../theme/ThemeProvider';
 import { ROUTES } from '../../constants';
 
 const MORE_ITEMS = [
+  { label: 'Sales', icon: ReceiptRounded, route: ROUTES.SALES },
   { label: 'Expenses', icon: ReceiptLongRounded, route: ROUTES.EXPENSES },
   { label: 'Reports', icon: AssessmentRounded, route: ROUTES.REPORTS },
   { label: 'Customer Requests', icon: RecordVoiceOverRounded, route: ROUTES.REQUESTS },
@@ -81,7 +82,7 @@ export const MoreSidebarProvider = ({ children }) => {
 
             return (
               <Box key={item.route}>
-                {idx === 3 && <Divider sx={{ mx: 2, my: 1, borderColor: colors.border }} />}
+                {idx === 4 && <Divider sx={{ mx: 2, my: 1, borderColor: colors.border }} />}
                 <ListItemButton
                   onClick={() => { setOpen(false); navigate(item.route); }}
                   sx={{

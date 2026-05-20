@@ -161,19 +161,27 @@ const ReportsPage = () => {
               }}>
                 {netPositive ? '+' : ''}{formatINR(pl.net)}
               </Typography>
-              <Chip
-                size="small"
-                icon={netPositive ? <TrendingUpRounded sx={{ fontSize: 14 }} /> : <TrendingDownRounded sx={{ fontSize: 14 }} />}
-                label={`Profit ${formatINR(pl.saleProfit)} − Expenses ${formatINR(pl.totalExpense)}`}
-                sx={{
-                  backgroundColor: colors.surfaceAlt,
-                  color: colors.textSecondary,
-                  fontWeight: 500,
-                  fontSize: 11,
-                  height: 24,
-                  '& .MuiChip-icon': { color: 'inherit' },
-                }}
-              />
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                <Chip
+                  size="small"
+                  icon={netPositive ? <TrendingUpRounded sx={{ fontSize: 14 }} /> : <TrendingDownRounded sx={{ fontSize: 14 }} />}
+                  label={`Sale profit ${formatINR(pl.saleProfit)} − Operating ${formatINR(pl.operatingExpenses)}`}
+                  sx={{
+                    backgroundColor: colors.surfaceAlt,
+                    color: colors.textSecondary,
+                    fontWeight: 500,
+                    fontSize: 11,
+                    height: 24,
+                    alignSelf: 'flex-start',
+                    '& .MuiChip-icon': { color: 'inherit' },
+                  }}
+                />
+                {pl.inventoryExpenses > 0 && (
+                  <Typography sx={{ fontSize: 11, color: colors.textMuted, mt: 0.25 }}>
+                    Bulk purchases {formatINR(pl.inventoryExpenses)} excluded — already in sale cost
+                  </Typography>
+                )}
+              </Box>
             </Box>
 
             <Card sx={{ p: 2 }}>
@@ -283,10 +291,18 @@ const ReportsPage = () => {
             <Stack spacing={2}>
               <Card sx={{ p: 2 }}>
                 <Box sx={{ display: 'flex', gap: 2 }}>
-                  <StatBlock label="TOTAL" value={formatINR(expenseTotal, { compact: true })} accent />
-                  <StatBlock label="ENTRIES" value={expenses.length} />
-                  <StatBlock label="BULK" value={expenses.filter((e) => e.isBulkPurchase).length} />
+                  <StatBlock label="OPERATING" value={formatINR(pl.operatingExpenses, { compact: true })} accent
+                    sublabel="Affects net profit" />
+                  <StatBlock label="INVENTORY" value={formatINR(pl.inventoryExpenses, { compact: true })}
+                    sublabel="In sale cost (COGS)" />
                 </Box>
+                {pl.inventoryExpenses > 0 && (
+                  <Box sx={{ mt: 1.5, pt: 1.5, borderTop: `1px solid ${colors.border}` }}>
+                    <Typography sx={{ fontSize: 11, color: colors.textMuted, lineHeight: 1.6 }}>
+                      Bulk purchases are excluded from net profit — their cost is already deducted inside each sale's profit via cost per piece.
+                    </Typography>
+                  </Box>
+                )}
               </Card>
 
               <Card sx={{ p: 2 }}>

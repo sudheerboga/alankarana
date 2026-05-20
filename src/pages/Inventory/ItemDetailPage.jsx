@@ -160,10 +160,10 @@ const ItemDetailPage = () => {
           <ListItemIcon><ContentPasteRounded fontSize="small" /></ListItemIcon>
           Copy code
         </MenuItem>
-        <MenuItem onClick={() => { setMenuAnchor(null); duplicate.run(id); }}>
+        {/* <MenuItem onClick={() => { setMenuAnchor(null); duplicate.run(id); }}>
           <ListItemIcon><ContentCopyRounded fontSize="small" /></ListItemIcon>
           Duplicate
-        </MenuItem>
+        </MenuItem> */}
         <Divider />
         <MenuItem onClick={handleDelete} sx={{ color: colors.danger }}>
           <ListItemIcon><DeleteRounded fontSize="small" sx={{ color: colors.danger }} /></ListItemIcon>
@@ -174,7 +174,7 @@ const ItemDetailPage = () => {
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}>
         <Box sx={{ p: 2 }}>
           {/* Hero image */}
-          <Box
+          {/* <Box
             sx={{
               width: '100%',
               aspectRatio: '4/3',
@@ -192,7 +192,7 @@ const ItemDetailPage = () => {
             }}
           >
             {!imgUrl && <Inventory2Outlined sx={{ fontSize: 64 }} />}
-          </Box>
+          </Box> */}
 
           {/* Title block */}
           <Stack spacing={0.5} sx={{ mb: 2 }}>
@@ -225,16 +225,25 @@ const ItemDetailPage = () => {
             >
               {item.itemName}
             </Typography>
-            <Typography
-              sx={{
-                fontSize: 12,
-                fontFamily: typography.fontMono,
-                color: colors.textMuted,
-                letterSpacing: '0.02em',
-              }}
-            >
-              {item.itemCode}
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Typography
+                sx={{
+                  fontSize: 12,
+                  fontFamily: typography.fontMono,
+                  color: colors.textMuted,
+                  letterSpacing: '0.02em',
+                }}
+              >
+                {item.itemCode}
+              </Typography>
+              <IconButton
+                size="small"
+                onClick={handleCopyCode}
+                sx={{ p: 0.25, color: colors.textMuted, '&:active': { opacity: 0.6 } }}
+              >
+                <ContentCopyRounded sx={{ fontSize: 13 }} />
+              </IconButton>
+            </Box>
           </Stack>
 
           {/* Stat grid */}

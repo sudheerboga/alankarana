@@ -1,7 +1,7 @@
 {
   "name": "Alankarana",
   "short_name": "Alankarana",
-  "description": "Boutique sales & inventory management",
+  "description": "Sales & inventory management",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

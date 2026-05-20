@@ -2,40 +2,18 @@ import { Box, Paper, Typography } from '@mui/material';
 import {
   HomeOutlined, HomeRounded,
   Inventory2Outlined, Inventory2Rounded,
-  ReceiptOutlined, ReceiptRounded,
-  ReceiptLongOutlined, ReceiptLongRounded,
   AddRounded,
 } from '@mui/icons-material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../../theme/ThemeProvider';
 import { ROUTES } from '../../constants';
 
-const NAV_ITEMS = [
-  {
-    label: 'Home',
-    value: ROUTES.DASHBOARD,
-    icon: HomeOutlined,
-    activeIcon: HomeRounded,
-  },
-  {
-    label: 'Items',
-    value: ROUTES.ITEMS,
-    icon: Inventory2Outlined,
-    activeIcon: Inventory2Rounded,
-  },
-  // Center FAB sits between index 1 and 2
-  {
-    label: 'Sales',
-    value: ROUTES.SALES,
-    icon: ReceiptOutlined,
-    activeIcon: ReceiptRounded,
-  },
-  {
-    label: 'Expenses',
-    value: ROUTES.EXPENSES,
-    icon: ReceiptLongOutlined,
-    activeIcon: ReceiptLongRounded,
-  },
+const LEFT_ITEMS = [
+  { label: 'Home', value: ROUTES.DASHBOARD, icon: HomeOutlined, activeIcon: HomeRounded },
+];
+
+const RIGHT_ITEMS = [
+  { label: 'Items', value: ROUTES.ITEMS, icon: Inventory2Outlined, activeIcon: Inventory2Rounded },
 ];
 
 const NavTab = ({ item, isActive, onClick }) => {
@@ -95,9 +73,6 @@ const BottomNav = () => {
     navigate(item.value);
   };
 
-  const leftTabs = NAV_ITEMS.slice(0, 2);
-  const rightTabs = NAV_ITEMS.slice(2);
-
   return (
     <Paper
       elevation={0}
@@ -121,7 +96,7 @@ const BottomNav = () => {
         }}
       >
         {/* Left tabs */}
-        {leftTabs.map((item) => (
+        {LEFT_ITEMS.map((item) => (
           <NavTab
             key={item.value}
             item={item}
@@ -134,7 +109,7 @@ const BottomNav = () => {
         <Box sx={{ width: 72, flexShrink: 0 }} />
 
         {/* Right tabs */}
-        {rightTabs.map((item) => (
+        {RIGHT_ITEMS.map((item) => (
           <NavTab
             key={item.value}
             item={item}

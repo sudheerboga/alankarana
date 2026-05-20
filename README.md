@@ -30,6 +30,10 @@ npm run dev
 npm run build
 ```
 
+### For future deployments:
+```bash
+npm run build && firebase deploy
+
 ## Project Structure
 
 ```
