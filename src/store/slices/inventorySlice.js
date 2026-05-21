@@ -9,6 +9,8 @@ const initialState = {
     search: '',
     category: 'all',
     stockStatus: 'all',   // 'all' | 'in_stock' | 'low' | 'out'
+    priceRange: 'all',    // 'all' | 'low' | 'mid' | 'high'
+    flag: null,           // 'old' | 'new' | 'bestselling' | null
     sort: 'recent',       // 'recent' | 'name' | 'oldest' | 'bestselling'
   },
   lastSyncedAt: null,

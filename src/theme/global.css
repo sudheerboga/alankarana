@@ -28,6 +28,19 @@ button, input, select, textarea {
   font-family: inherit;
 }
 
+/* Override browser autofill blue/yellow background — use inset box-shadow trick
+   since browsers block background-color overrides on autofilled inputs */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  box-shadow: 0 0 0 1000px #ffffff inset !important;
+  -webkit-text-fill-color: #16161A !important;
+  caret-color: #16161A;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
 button { touch-action: manipulation; }
 
 /* Minimal scrollbars */

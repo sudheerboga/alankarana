@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import {
   Box, Card, Typography, Stack, Button, IconButton, Chip, Divider, Menu, MenuItem, ListItemIcon,
@@ -61,8 +61,10 @@ const ItemDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [searchParams] = useSearchParams();
   const { colors, typography } = useTheme();
   const [menuAnchor, setMenuAnchor] = useState(null);
+  const isNew = searchParams.get('new') === '1';
 
   const { item, loading, exists } = useDoc(COLLECTIONS.INVENTORY, id);
 
@@ -213,6 +215,11 @@ const ItemDetailPage = () => {
               <Typography sx={{ fontSize: 12, color: colors.textMuted }}>
                 Added {formatRelative(item.createdAt)}
               </Typography>
+              {item.purchaseDate && (
+                <Typography sx={{ fontSize: 12, color: colors.textMuted }}>
+                  Purchased {formatDate(item.purchaseDate)}
+                </Typography>
+              )}
             </Box>
             <Typography
               sx={{
@@ -225,7 +232,22 @@ const ItemDetailPage = () => {
             >
               {item.itemName}
             </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Box
+              sx={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 0.5,
+                borderRadius: 1.5,
+                px: isNew ? 1 : 0,
+                py: isNew ? 0.5 : 0,
+                animation: isNew ? 'codeHighlight 3s ease-out forwards' : 'none',
+                '@keyframes codeHighlight': {
+                  '0%': { backgroundColor: `${colors.primary}28`, boxShadow: `0 0 0 3px ${colors.primary}1A` },
+                  '65%': { backgroundColor: `${colors.primary}10` },
+                  '100%': { backgroundColor: 'transparent', boxShadow: 'none', px: 0 },
+                },
+              }}
+            >
               <Typography
                 sx={{
                   fontSize: 12,

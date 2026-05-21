@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Alankarana - Mobile-first PWA for boutique sales & inventory management",
+  "description": "Alankarana - Mobile-first PWA for sales & inventory management",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -13,9 +13,10 @@
   "dependencies": {
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
-    "@mui/material": "^5.15.20",
     "@mui/icons-material": "^5.15.20",
+    "@mui/material": "^5.15.20",
     "@reduxjs/toolkit": "^2.2.5",
+    "@zxing/browser": "^0.2.0",
     "dayjs": "^1.11.11",
     "firebase": "^10.12.2",
     "framer-motion": "^11.2.10",

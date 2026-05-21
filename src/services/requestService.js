@@ -8,6 +8,7 @@ export const createRequest = async (input) => {
     customerName: input.customerName?.trim() || null,
     status: REQUEST_STATUS.PENDING,
     notes: input.notes?.trim() || '',
+    images: input.images || [],
   };
   const id = await fbCreate(COLLECTIONS.REQUESTED_ITEMS, doc);
   return { id, ...doc };

@@ -9,7 +9,7 @@ import { useMoreDrawer } from './MoreSidebar';
 
 /**
  * Universal top bar. Pass `back` to show a back button, `actions` for trailing icons.
- * Title uses the display serif for that boutique feel.
+ * Title uses the display serif for that feel.
  */
 const TopBar = ({ title, back = false, onBack, actions = null, transparent = false }) => {
   const navigate = useNavigate();

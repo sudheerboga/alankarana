@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import {
   Box, Card, Stack, Typography, TextField, Button, Tabs, Tab,
-  InputAdornment, CircularProgress, Link,
+  InputAdornment, CircularProgress, Link, Select, MenuItem, FormControl,
 } from '@mui/material';
 import { PhoneRounded, EmailRounded, LockRounded } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -23,6 +23,7 @@ const LoginPage = () => {
   const [tab, setTab] = useState(0); // 0 = phone, 1 = email
 
   // Phone state
+  const [countryCode, setCountryCode] = useState('+91');
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [otpSent, setOtpSent] = useState(false);
@@ -46,10 +47,20 @@ const LoginPage = () => {
   // Cleanup reCAPTCHA verifier on unmount
   useEffect(() => () => verifierRef.current?.clear?.(), []);
 
+  const COUNTRY_CODES = [
+    { code: '+91',  label: '🇮🇳 +91'  },
+    { code: '+971', label: '🇦🇪 +971' },
+    { code: '+1',   label: '🇺🇸 +1'   },
+    { code: '+44',  label: '🇬🇧 +44'  },
+    { code: '+65',  label: '🇸🇬 +65'  },
+    { code: '+60',  label: '🇲🇾 +60'  },
+    { code: '+61',  label: '🇦🇺 +61'  },
+  ];
+
   const handleSendOtp = async () => {
-    const formatted = phone.trim();
+    const formatted = `${countryCode}${phone.trim()}`;
     if (!/^\+\d{10,15}$/.test(formatted)) {
-      dispatch(pushToast({ message: 'Enter phone in +91XXXXXXXXXX format', severity: 'warning' }));
+      dispatch(pushToast({ message: 'Enter a valid phone number', severity: 'warning' }));
       return;
     }
     setLoading(true);
@@ -160,18 +171,34 @@ const LoginPage = () => {
 
           {tab === 0 && (
             <Stack spacing={2} sx={{ width: '100%' }}>
-              <TextField
-                fullWidth
-                label="Phone Number"
-                placeholder="+919876543210"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                disabled={otpSent}
-                inputProps={{ inputMode: 'tel' }}
-                InputProps={{
-                  startAdornment: <InputAdornment position="start"><PhoneRounded fontSize="small" /></InputAdornment>,
-                }}
-              />
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <FormControl sx={{ minWidth: 100 }} disabled={otpSent}>
+                  <Select
+                    value={countryCode}
+                    onChange={(e) => setCountryCode(e.target.value)}
+                    size="medium"
+                    sx={{ fontSize: 14 }}
+                  >
+                    {COUNTRY_CODES.map((c) => (
+                      <MenuItem key={c.code} value={c.code} sx={{ fontSize: 14 }}>
+                        {c.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <TextField
+                  fullWidth
+                  label="Phone Number"
+                  placeholder="9876543210"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                  disabled={otpSent}
+                  inputProps={{ inputMode: 'tel', maxLength: 12 }}
+                  InputProps={{
+                    startAdornment: <InputAdornment position="start"><PhoneRounded fontSize="small" /></InputAdornment>,
+                  }}
+                />
+              </Box>
 
               {otpSent && (
                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
@@ -188,7 +215,7 @@ const LoginPage = () => {
                     />
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <Typography sx={{ fontSize: 12, color: colors.textMuted }}>
-                        Code sent to {phone}
+                        Code sent to {countryCode}{phone}
                       </Typography>
                       {resendIn > 0 ? (
                         <Typography sx={{ fontSize: 12, color: colors.textMuted }}>

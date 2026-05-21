@@ -11,7 +11,7 @@ export default defineConfig({
       manifest: {
         name: 'Alankarana',
         short_name: 'Alankarana',
-        description: 'Boutique sales & inventory management',
+        description: 'sales & inventory management',
         theme_color: '#8B1A3A',
         background_color: '#FBF7F2',
         display: 'standalone',

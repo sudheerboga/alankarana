@@ -8,7 +8,7 @@ import BarChart from '../../components/common/BarChart';
 import EmptyState from '../../components/common/EmptyState';
 import { useCollection } from '../../hooks/useCollection';
 import { useTheme } from '../../theme/ThemeProvider';
-import { formatINR } from '../../utils/format';
+import { formatINR, toNumber } from '../../utils/format';
 import { getDateRange, DATE_RANGE_OPTIONS } from '../../utils/dateRange';
 import {
   aggregateSales, groupSalesByBucket, topCategoriesByRevenue,
@@ -90,6 +90,40 @@ const ReportsPage = () => {
     const out = inventory.filter((i) => (i.remainingPieces ?? 0) <= 0).length;
     return { count: inventory.length, totalValue, low, out };
   }, [inventory]);
+
+  // Per-category: sales revenue + quantity sold + current stock value
+  const catStats = useMemo(() => {
+    const salesMap = new Map();
+    for (const s of sales) {
+      if (!s.category) continue;
+      if (!salesMap.has(s.category)) salesMap.set(s.category, { revenue: 0, quantity: 0, profit: 0 });
+      const c = salesMap.get(s.category);
+      c.revenue  += toNumber(s.totalSaleAmount);
+      c.quantity += toNumber(s.quantity);
+      c.profit   += toNumber(s.profit);
+    }
+    const stockMap = new Map();
+    for (const item of inventory) {
+      if (!item.category) continue;
+      if (!stockMap.has(item.category)) stockMap.set(item.category, { value: 0, pieces: 0 });
+      const c = stockMap.get(item.category);
+      c.value  += (item.remainingPieces || 0) * (item.costPerPiece || 0);
+      c.pieces += item.remainingPieces || 0;
+    }
+    const keys = new Set([...salesMap.keys(), ...stockMap.keys()]);
+    return Array.from(keys)
+      .map((cat) => ({
+        category:    cat,
+        revenue:     salesMap.get(cat)?.revenue   || 0,
+        quantity:    salesMap.get(cat)?.quantity  || 0,
+        profit:      salesMap.get(cat)?.profit    || 0,
+        stockValue:  stockMap.get(cat)?.value     || 0,
+        stockPieces: stockMap.get(cat)?.pieces    || 0,
+      }))
+      .filter((c) => c.revenue > 0)
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 6);
+  }, [sales, inventory]);
 
   const rangeLabel = DATE_RANGE_OPTIONS.find((o) => o.value === rangeKey)?.label || rangeKey;
   const loading = salesLoading || expensesLoading;
@@ -219,23 +253,46 @@ const ReportsPage = () => {
 
               <Card sx={{ p: 2 }}>
                 <Typography sx={{ fontSize: 11, fontWeight: 600, color: colors.textMuted, letterSpacing: '0.05em', mb: 2 }}>
-                  TOP CATEGORIES
+                  SALES BY CATEGORY
                 </Typography>
-                <Stack spacing={1.5}>
-                  {topCats.map((c) => {
+                <Stack spacing={2}>
+                  {catStats.map((c) => {
                     const pct = salesSummary.revenue > 0 ? (c.revenue / salesSummary.revenue) * 100 : 0;
                     return (
                       <Box key={c.category}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                          <Typography sx={{ fontSize: 13, color: colors.text }}>
+                        {/* Category name + total sale amount */}
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', mb: 0.25 }}>
+                          <Typography sx={{ fontSize: 14, fontWeight: 600, color: colors.text }}>
                             {categoryNameMap[c.category] || c.category}
                           </Typography>
-                          <Typography sx={{ fontSize: 13, fontWeight: 600, color: colors.text }}>
+                          <Typography sx={{ fontSize: 15, fontWeight: 700, color: colors.primary }}>
                             {formatINR(c.revenue)}
                           </Typography>
                         </Box>
-                        <Box sx={{ height: 4, backgroundColor: colors.surfaceAlt, borderRadius: 2, overflow: 'hidden' }}>
-                          <Box sx={{ width: `${pct}%`, height: '100%', backgroundColor: colors.primary, transition: 'width 0.3s ease' }} />
+
+                        {/* Sold + profit */}
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.25 }}>
+                          <Typography sx={{ fontSize: 11, color: colors.textMuted }}>
+                            {c.quantity} {c.quantity === 1 ? 'piece' : 'pieces'} sold · profit {formatINR(c.profit)}
+                          </Typography>
+                          <Typography sx={{ fontSize: 11, color: colors.textMuted }}>
+                            {pct.toFixed(0)}% of sales
+                          </Typography>
+                        </Box>
+
+                        {/* Stock remaining */}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.75 }}>
+                          <Typography sx={{ fontSize: 11, color: colors.textSecondary }}>
+                            Stock in hand:
+                          </Typography>
+                          <Typography sx={{ fontSize: 11, fontWeight: 600, color: colors.text }}>
+                            {c.stockPieces} pcs · {formatINR(c.stockValue)}
+                          </Typography>
+                        </Box>
+
+                        {/* Progress bar */}
+                        <Box sx={{ height: 5, backgroundColor: colors.surfaceAlt, borderRadius: 3, overflow: 'hidden' }}>
+                          <Box sx={{ width: `${pct}%`, height: '100%', backgroundColor: colors.primary, borderRadius: 3, transition: 'width 0.4s ease' }} />
                         </Box>
                       </Box>
                     );

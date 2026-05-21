@@ -23,8 +23,15 @@ const SORT_OPTIONS = [
 const FLAG_OPTIONS = [
   { value: null, label: 'All items' },
   { value: 'new', label: 'New (7 days)' },
-  { value: 'old', label: 'Old stock' },
+  { value: 'old', label: 'Old stock (3m+)' },
   { value: 'bestselling', label: 'Best sellers' },
+];
+
+const PRICE_OPTIONS = [
+  { value: 'all', label: 'All prices' },
+  { value: 'low', label: 'Under ₹500' },
+  { value: 'mid', label: '₹500 – ₹2,000' },
+  { value: 'high', label: 'Above ₹2,000' },
 ];
 
 const FilterChips = ({ options, value, onChange }) => {
@@ -75,6 +82,7 @@ const InventoryFilterSheet = ({ open, onClose, filters, onChange, onReset }) => 
         sx: {
           width: isMobile ? '100%' : 360,
           maxHeight: isMobile ? '85vh' : '100%',
+          borderRadius: 0,
           borderTopLeftRadius: isMobile ? 24 : 0,
           borderTopRightRadius: isMobile ? 24 : 0,
           backgroundColor: colors.bg,
@@ -120,6 +128,19 @@ const InventoryFilterSheet = ({ open, onClose, filters, onChange, onReset }) => 
               options={STOCK_OPTIONS}
               value={filters.stockStatus}
               onChange={(v) => onChange({ stockStatus: v })}
+            />
+          </Box>
+
+          <Divider sx={{ borderColor: colors.border }} />
+
+          <Box>
+            <Typography sx={{ fontSize: 13, fontWeight: 600, color: colors.textSecondary, mb: 1, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Cost price
+            </Typography>
+            <FilterChips
+              options={PRICE_OPTIONS}
+              value={filters.priceRange}
+              onChange={(v) => onChange({ priceRange: v })}
             />
           </Box>
 

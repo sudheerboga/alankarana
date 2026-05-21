@@ -1,30 +1,49 @@
+import { useEffect, useRef, useState } from 'react';
 import { RouterProvider } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { router } from '../routes/router';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { useAuthListener } from '../hooks/useAuthListener';
 import { useCategoriesSync } from '../hooks/useCategoriesSync';
 import ToastHost from '../components/feedback/ToastHost';
 import ConfirmDialogHost from '../components/feedback/ConfirmDialogHost';
+import SplashScreen from '../components/common/SplashScreen';
+import { selectAuthStatus } from '../store/slices/authSlice';
 
-/**
- * App root. Order matters:
- *  - Auth listener runs once and keeps Redux in sync with Firebase auth state
- *  - Categories sync runs after auth (no-ops until user is signed in)
- *  - Online status hook syncs network state to Redux
- *  - Router renders pages (which may dispatch toasts/confirms)
- *  - ToastHost + ConfirmDialogHost render OUTSIDE the router so they survive
- *    route changes and sit above all page content.
- */
+const MINIMUM_SPLASH_MS = 1600; // let the animation play before fading out
+
 const App = () => {
   useAuthListener();
   useCategoriesSync();
   useOnlineStatus();
+
+  const status = useSelector(selectAuthStatus);
+  const [splashExiting, setSplashExiting] = useState(false);
+  const [splashGone, setSplashGone] = useState(false);
+  const resolvedRef = useRef(false);
+  const mountTimeRef = useRef(Date.now());
+
+  useEffect(() => {
+    const isResolved = status !== 'idle' && status !== 'loading';
+    if (isResolved && !resolvedRef.current) {
+      resolvedRef.current = true;
+      const elapsed = Date.now() - mountTimeRef.current;
+      const remaining = Math.max(0, MINIMUM_SPLASH_MS - elapsed);
+      const timer = setTimeout(() => {
+        setSplashExiting(true);
+        // unmount after the CSS fade-out finishes (0.38s)
+        setTimeout(() => setSplashGone(true), 400);
+      }, remaining);
+      return () => clearTimeout(timer);
+    }
+  }, [status]);
 
   return (
     <>
       <RouterProvider router={router} />
       <ToastHost />
       <ConfirmDialogHost />
+      {!splashGone && <SplashScreen done={splashExiting} />}
     </>
   );
 };

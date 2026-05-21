@@ -1,11 +1,13 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm, Controller, useWatch } from 'react-hook-form';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import {
   Box, Card, Typography, Stack, TextField, Button, Divider, InputAdornment, IconButton,
 } from '@mui/material';
-import { CurrencyRupeeRounded, SaveRounded } from '@mui/icons-material';
+import { CurrencyRupeeRounded, SaveRounded, QrCodeScannerRounded } from '@mui/icons-material';
+import BarcodeScanner from '../../components/common/BarcodeScanner';
+import dayjs from 'dayjs';
 import { motion } from 'framer-motion';
 import TopBar from '../../components/layout/TopBar';
 import CategorySelect from '../../components/common/CategorySelect';
@@ -20,24 +22,35 @@ import { useTheme } from '../../theme/ThemeProvider';
 import { formatINR, toNumber } from '../../utils/format';
 import { COLLECTIONS, ROUTES } from '../../constants';
 
+const toDateStr = (d) => {
+  if (!d) return dayjs().format('YYYY-MM-DD');
+  const date = d.toDate ? d.toDate() : new Date(d);
+  return dayjs(date).format('YYYY-MM-DD');
+};
+
 const emptyDefaults = {
   itemName: '',
   category: '',
+  barcode: '',
+  purchaseDate: dayjs().format('YYYY-MM-DD'),
   costPerPiece: '',
   sellingPricePerPiece: '',
   setQuantity: 1,
   piecesPerSet: 1,
-  totalPieces: '',
+  totalPieces: 1,
   notes: '',
   images: [],
 };
 
 const ItemFormPage = ({ mode = 'create' }) => {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const barcodeParam = searchParams.get('barcode') || '';
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { colors, typography } = useTheme();
   const isEdit = mode === 'edit';
+  const [scannerOpen, setScannerOpen] = useState(false);
 
   // Load existing item for edit mode
   const { item: existingItem, loading: loadingItem } = useDoc(
@@ -69,6 +82,8 @@ const ItemFormPage = ({ mode = 'create' }) => {
       reset({
         itemName: existingItem.itemName ?? '',
         category: existingItem.category ?? '',
+        barcode: existingItem.barcode ?? '',
+        purchaseDate: toDateStr(existingItem.purchaseDate),
         costPerPiece: existingItem.costPerPiece ?? '',
         sellingPricePerPiece: existingItem.sellingPricePerPiece ?? '',
         setQuantity: existingItem.setQuantity ?? 1,
@@ -83,6 +98,9 @@ const ItemFormPage = ({ mode = 'create' }) => {
         reset(saved);
         dispatch(pushToast({ message: 'Restored unsaved draft', severity: 'info' }));
       }
+      if (barcodeParam) {
+        setValue('barcode', barcodeParam, { shouldDirty: true });
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEdit, existingItem]);
@@ -94,16 +112,6 @@ const ItemFormPage = ({ mode = 'create' }) => {
   useEffect(() => {
     if (!isEdit && isDirty) draft.save(watched);
   }, [watched, isDirty, isEdit, draft]);
-
-  // Auto-compute totalPieces from set × piecesPerSet, but only when user
-  // hasn't typed a totalPieces override
-  useEffect(() => {
-    const sq = toNumber(watched.setQuantity, 0);
-    const pps = toNumber(watched.piecesPerSet, 0);
-    if (sq > 0 && pps > 0) {
-      setValue('totalPieces', sq * pps, { shouldDirty: false });
-    }
-  }, [watched.setQuantity, watched.piecesPerSet, setValue]);
 
   // Live profit preview
   const cost = toNumber(watched.costPerPiece);
@@ -125,7 +133,10 @@ const ItemFormPage = ({ mode = 'create' }) => {
       errorMessage: 'Could not save item',
       onSuccess: (result) => {
         draft.clear();
-        navigate(ROUTES.ITEM_DETAIL(result.id), { replace: true });
+        const dest = isEdit
+          ? ROUTES.ITEM_DETAIL(result.id)
+          : `${ROUTES.ITEM_DETAIL(result.id)}?new=1`;
+        navigate(dest, { replace: true });
       },
     }
   );
@@ -198,8 +209,61 @@ const ItemFormPage = ({ mode = 'create' }) => {
                     />
                   )}
                 />
+                <Controller
+                  name="barcode"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      label="Barcode (optional)"
+                      fullWidth
+                      placeholder="Scan or type supplier barcode"
+                      helperText="Lets you find this item by scanning during a sale"
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              size="small"
+                              edge="end"
+                              onClick={() => setScannerOpen(true)}
+                              sx={{ color: colors.primary }}
+                            >
+                              <QrCodeScannerRounded fontSize="small" />
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                  )}
+                />
+                <Controller
+                  name="purchaseDate"
+                  control={control}
+                  rules={{ required: 'Required' }}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      label="Purchase date"
+                      type="date"
+                      fullWidth
+                      required
+                      InputLabelProps={{ shrink: true }}
+                      error={!!errors.purchaseDate}
+                      helperText={errors.purchaseDate?.message}
+                    />
+                  )}
+                />
               </Stack>
             </Card>
+
+            <BarcodeScanner
+              open={scannerOpen}
+              onScan={(code) => {
+                setValue('barcode', code, { shouldDirty: true });
+                setScannerOpen(false);
+              }}
+              onClose={() => setScannerOpen(false)}
+            />
 
             {/* Pricing */}
             <Card sx={{ p: 2 }}>
@@ -208,6 +272,7 @@ const ItemFormPage = ({ mode = 'create' }) => {
               </Typography>
               <Stack spacing={2}>
                 <Box sx={{ display: 'flex', gap: 2 }}>
+                  
                   <Controller
                     name="costPerPiece"
                     control={control}
@@ -228,10 +293,11 @@ const ItemFormPage = ({ mode = 'create' }) => {
                       />
                     )}
                   />
+
                   <Controller
                     name="sellingPricePerPiece"
                     control={control}
-                    rules={{ required: 'Required', min: { value: 0, message: 'Invalid' } }}
+                    rules={{ required: 'Required', min: { value: 1, message: 'Must be > 0' } }}
                     render={({ field }) => (
                       <TextField
                         {...field}
@@ -244,7 +310,7 @@ const ItemFormPage = ({ mode = 'create' }) => {
                         InputProps={{
                           startAdornment: <InputAdornment position="start"><CurrencyRupeeRounded fontSize="small" /></InputAdornment>,
                         }}
-                        inputProps={{ inputMode: 'decimal', min: 0, step: 1 }}
+                        inputProps={{ inputMode: 'decimal', min: 1, step: 1 }}
                       />
                     )}
                   />
@@ -294,7 +360,16 @@ const ItemFormPage = ({ mode = 'create' }) => {
                   <Controller
                     name="totalPieces"
                     control={control}
-                    rules={{ required: 'Required', min: { value: 1, message: 'Must be ≥ 1' } }}
+                    rules={{
+                      required: 'Required',
+                      min: { value: 1, message: 'Must be ≥ 1' },
+                      validate: (v) => {
+                        if (!isEdit || !existingItem) return true;
+                        const sold = existingItem.soldPieces || 0;
+                        if (toNumber(v) < sold) return `Can't be less than ${sold} (already sold)`;
+                        return true;
+                      },
+                    }}
                     render={({ field }) => (
                       <TextField
                         {...field}
@@ -303,7 +378,7 @@ const ItemFormPage = ({ mode = 'create' }) => {
                         required
                         fullWidth
                         error={!!errors.totalPieces}
-                        helperText={errors.totalPieces?.message}
+                        helperText={errors.totalPieces?.message || (isEdit && existingItem?.soldPieces ? `${existingItem.soldPieces} already sold` : '')}
                         inputProps={{ inputMode: 'numeric', min: 1 }}
                       />
                     )}

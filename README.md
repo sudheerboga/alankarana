@@ -1,6 +1,6 @@
 # Alankarana
 
-Mobile-first PWA for boutique sales & inventory management — built with React + Redux Toolkit + Firebase.
+Mobile-first PWA for sales & inventory management — built with React + Redux Toolkit + Firebase.
 
 ## Stack
 
@@ -151,7 +151,7 @@ src/
 
 ### What's intentionally NOT in this commit
 - **Offline write queue**: Firestore's built-in offline persistence handles most cases automatically — writes queue when offline and sync when reconnected. A custom queue would be needed only for image uploads (Cloudinary doesn't queue). If you need this, ping me.
-- **Virtualized lists**: not yet needed at boutique scale (~hundreds of items). When you cross 2-3k items, add `react-window` to the inventory list.
+- **Virtualized lists**: not yet needed at scale (~hundreds of items). When you cross 2-3k items, add `react-window` to the inventory list.
 - **PDF / Excel export from reports**: not in spec; easy to add later.
 
 ## Design Tokens

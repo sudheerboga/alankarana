@@ -85,6 +85,7 @@ const VendorsPage = () => {
                 <ListItem
                   key={v.id}
                   divider={i < vendors.length - 1}
+                  sx={{ pr: '96px' }}
                   secondaryAction={
                     <Box>
                       <IconButton onClick={() => openEdit(v)} sx={{ color: colors.textSecondary }}>

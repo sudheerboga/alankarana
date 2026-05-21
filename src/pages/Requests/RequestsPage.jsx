@@ -1,13 +1,14 @@
 import { useState, useMemo } from 'react';
 import {
-  Box, Card, Stack, Typography, TextField, Button, Chip, IconButton, Checkbox, Tabs, Tab,
+  Box, Card, Stack, Typography, TextField, Button, Chip, IconButton, Checkbox, Tabs, Tab, Dialog,
 } from '@mui/material';
-import { AddRounded, DeleteOutlineRounded, RecordVoiceOverOutlined } from '@mui/icons-material';
+import { AddRounded, DeleteOutlineRounded, RecordVoiceOverOutlined, CloseRounded, ChevronLeftRounded, ChevronRightRounded } from '@mui/icons-material';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import TopBar from '../../components/layout/TopBar';
 import EmptyState from '../../components/common/EmptyState';
 import CategorySelect from '../../components/common/CategorySelect';
+import ImagePicker from '../../components/common/ImagePicker';
 import { useCollection } from '../../hooks/useCollection';
 import { useMutation } from '../../hooks/useMutation';
 import { createRequest, toggleRequestStatus, deleteRequest } from '../../services/requestService';
@@ -17,13 +18,157 @@ import { useTheme } from '../../theme/ThemeProvider';
 import { formatRelative } from '../../utils/format';
 import { COLLECTIONS, REQUEST_STATUS } from '../../constants';
 
+/* ── Full-screen image viewer ── */
+const ImageViewer = ({ images, startIndex = 0, open, onClose }) => {
+  const [idx, setIdx] = useState(startIndex);
+
+  const current = images?.[idx];
+  const imgUrl = current?.url || null;
+  const total = images?.length || 0;
+
+  return (
+    <Dialog
+      fullScreen
+      open={open}
+      onClose={onClose}
+      PaperProps={{ sx: { backgroundColor: '#000', borderRadius: 0 } }}
+    >
+      <Box sx={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <IconButton
+          onClick={onClose}
+          sx={{
+            position: 'absolute',
+            top: 'calc(env(safe-area-inset-top, 0px) + 12px)',
+            right: 12,
+            zIndex: 10,
+            backgroundColor: 'rgba(0,0,0,0.55)',
+            color: '#fff',
+          }}
+        >
+          <CloseRounded />
+        </IconButton>
+
+        {total > 1 && (
+          <Typography
+            sx={{
+              position: 'absolute',
+              top: 'calc(env(safe-area-inset-top, 0px) + 18px)',
+              left: 0, right: 0,
+              textAlign: 'center',
+              color: 'rgba(255,255,255,0.7)',
+              fontSize: 13,
+              zIndex: 10,
+            }}
+          >
+            {idx + 1} / {total}
+          </Typography>
+        )}
+
+        {imgUrl && (
+          <Box
+            component="img"
+            src={imgUrl}
+            sx={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', userSelect: 'none' }}
+          />
+        )}
+
+        {total > 1 && idx > 0 && (
+          <IconButton
+            onClick={() => setIdx((i) => i - 1)}
+            sx={{ position: 'absolute', left: 8, backgroundColor: 'rgba(0,0,0,0.45)', color: '#fff' }}
+          >
+            <ChevronLeftRounded />
+          </IconButton>
+        )}
+        {total > 1 && idx < total - 1 && (
+          <IconButton
+            onClick={() => setIdx((i) => i + 1)}
+            sx={{ position: 'absolute', right: 8, backgroundColor: 'rgba(0,0,0,0.45)', color: '#fff' }}
+          >
+            <ChevronRightRounded />
+          </IconButton>
+        )}
+      </Box>
+    </Dialog>
+  );
+};
+
+/* ── Request card ── */
+const RequestCard = ({ req, isDone, onToggle, onDelete, onViewImage, categoryNameMap }) => {
+  const { colors } = useTheme();
+  const images = req.images || [];
+
+  return (
+    <Card sx={{ p: 1.5, opacity: isDone ? 0.6 : 1 }}>
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+        <Checkbox
+          checked={isDone}
+          onChange={onToggle}
+          sx={{ p: 0.5, mt: -0.25 }}
+        />
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography sx={{
+            fontSize: 14,
+            color: colors.text,
+            textDecoration: isDone ? 'line-through' : 'none',
+            whiteSpace: 'pre-line',
+          }}>
+            {req.description}
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5, flexWrap: 'wrap' }}>
+            {req.category && (
+              <Chip
+                size="small"
+                label={categoryNameMap[req.category] || req.category}
+                sx={{ height: 18, fontSize: 10, backgroundColor: colors.surfaceAlt, color: colors.text }}
+              />
+            )}
+            <Typography sx={{ fontSize: 11, color: colors.textMuted }}>
+              {formatRelative(req.createdAt)}
+            </Typography>
+          </Box>
+
+          {/* Image thumbnails */}
+          {images.length > 0 && (
+            <Box sx={{ display: 'flex', gap: 0.75, mt: 1, flexWrap: 'wrap' }}>
+              {images.map((img, i) => (
+                <Box
+                  key={img.url || i}
+                  onClick={() => onViewImage(i)}
+                  sx={{
+                    width: 56, height: 56,
+                    borderRadius: 1.5,
+                    backgroundImage: `url(${img.url})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    border: `1px solid ${colors.border}`,
+                    cursor: 'pointer',
+                    flexShrink: 0,
+                    '&:active': { opacity: 0.75 },
+                  }}
+                />
+              ))}
+            </Box>
+          )}
+        </Box>
+        <IconButton size="small" onClick={onDelete} sx={{ color: colors.textMuted }}>
+          <DeleteOutlineRounded fontSize="small" />
+        </IconButton>
+      </Box>
+    </Card>
+  );
+};
+
+/* ── Page ── */
 const RequestsPage = () => {
-  const { colors, typography } = useTheme();
+  const { colors } = useTheme();
   const dispatch = useDispatch();
   const categories = useSelector(selectCategories);
-  const [tab, setTab] = useState(0); // 0 = pending, 1 = completed, 2 = all
+  const [tab, setTab] = useState(0);
   const [newDesc, setNewDesc] = useState('');
   const [newCategory, setNewCategory] = useState('');
+  const [newImages, setNewImages] = useState([]);
+  const [viewer, setViewer] = useState(null); // { images, startIndex }
 
   const { items: requests, loading } = useCollection(
     COLLECTIONS.REQUESTED_ITEMS,
@@ -46,7 +191,7 @@ const RequestsPage = () => {
   const add = useMutation(createRequest, {
     successMessage: 'Request added',
     errorMessage: 'Could not add',
-    onSuccess: () => { setNewDesc(''); setNewCategory(''); },
+    onSuccess: () => { setNewDesc(''); setNewCategory(''); setNewImages([]); },
   });
 
   const toggle = useMutation(
@@ -61,7 +206,7 @@ const RequestsPage = () => {
 
   const handleAdd = () => {
     if (!newDesc.trim()) return;
-    add.run({ description: newDesc, category: newCategory });
+    add.run({ description: newDesc, category: newCategory, images: newImages });
   };
 
   const handleDelete = (req) => {
@@ -101,6 +246,13 @@ const RequestsPage = () => {
               onChange={setNewCategory}
               label="Category (optional)"
             />
+            <ImagePicker
+              label="Reference photos (optional)"
+              value={newImages}
+              onChange={setNewImages}
+              maxImages={4}
+              folder="requests"
+            />
             <Button
               variant="contained"
               startIcon={<AddRounded />}
@@ -126,13 +278,13 @@ const RequestsPage = () => {
         ) : filtered.length === 0 ? (
           <EmptyState
             icon={RecordVoiceOverOutlined}
-            title={tab === 0 ? "No pending requests" : tab === 1 ? "No completed requests" : "No requests yet"}
+            title={tab === 0 ? 'No pending requests' : tab === 1 ? 'No completed requests' : 'No requests yet'}
             description="Customer asks for items you don't have? Note it here so you can plan market purchases."
           />
         ) : (
           <Stack spacing={1.5}>
             <AnimatePresence>
-              {filtered.map((req, idx) => {
+              {filtered.map((req) => {
                 const isDone = req.status === REQUEST_STATUS.COMPLETED;
                 return (
                   <motion.div
@@ -143,40 +295,14 @@ const RequestsPage = () => {
                     exit={{ opacity: 0, x: 100 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <Card sx={{ p: 1.5, opacity: isDone ? 0.6 : 1 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-                        <Checkbox
-                          checked={isDone}
-                          onChange={() => toggle.run({ id: req.id, status: req.status })}
-                          sx={{ p: 0.5, mt: -0.25 }}
-                        />
-                        <Box sx={{ flex: 1, minWidth: 0 }}>
-                          <Typography sx={{
-                            fontSize: 14,
-                            color: colors.text,
-                            textDecoration: isDone ? 'line-through' : 'none',
-                            whiteSpace: 'pre-line',
-                          }}>
-                            {req.description}
-                          </Typography>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5, flexWrap: 'wrap' }}>
-                            {req.category && (
-                              <Chip
-                                size="small"
-                                label={categoryNameMap[req.category] || req.category}
-                                sx={{ height: 18, fontSize: 10, backgroundColor: colors.surfaceAlt, color: colors.text }}
-                              />
-                            )}
-                            <Typography sx={{ fontSize: 11, color: colors.textMuted }}>
-                              {formatRelative(req.createdAt)}
-                            </Typography>
-                          </Box>
-                        </Box>
-                        <IconButton size="small" onClick={() => handleDelete(req)} sx={{ color: colors.textMuted }}>
-                          <DeleteOutlineRounded fontSize="small" />
-                        </IconButton>
-                      </Box>
-                    </Card>
+                    <RequestCard
+                      req={req}
+                      isDone={isDone}
+                      categoryNameMap={categoryNameMap}
+                      onToggle={() => toggle.run({ id: req.id, status: req.status })}
+                      onDelete={() => handleDelete(req)}
+                      onViewImage={(startIndex) => setViewer({ images: req.images || [], startIndex })}
+                    />
                   </motion.div>
                 );
               })}
@@ -184,6 +310,16 @@ const RequestsPage = () => {
           </Stack>
         )}
       </Box>
+
+      {/* Image viewer */}
+      {viewer && (
+        <ImageViewer
+          images={viewer.images}
+          startIndex={viewer.startIndex}
+          open={!!viewer}
+          onClose={() => setViewer(null)}
+        />
+      )}
     </Box>
   );
 };

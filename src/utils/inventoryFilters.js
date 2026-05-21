@@ -14,6 +14,7 @@ export const filterItems = (items, filters = {}) => {
     search = '',
     category = 'all',
     stockStatus = 'all',
+    priceRange = 'all', // 'all' | 'low' (<500) | 'mid' (500-2000) | 'high' (>2000)
     flag = null, // 'old' | 'new' | 'bestselling' | null
     sort = 'recent',
   } = filters;
@@ -33,6 +34,13 @@ export const filterItems = (items, filters = {}) => {
     if (stockStatus !== 'all') {
       const status = getStockStatus(it.remainingPieces ?? 0);
       if (status !== stockStatus) return false;
+    }
+    // Price range (cost per piece)
+    if (priceRange !== 'all') {
+      const cost = it.costPerPiece || 0;
+      if (priceRange === 'low' && cost >= 500) return false;
+      if (priceRange === 'mid' && (cost < 500 || cost > 2000)) return false;
+      if (priceRange === 'high' && cost <= 2000) return false;
     }
     // Flags
     if (flag === 'old' && !isOldStock(it)) return false;

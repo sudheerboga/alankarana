@@ -42,6 +42,7 @@ const InventoryListPage = () => {
   const activeFilterCount =
     (filters.category !== 'all' ? 1 : 0) +
     (filters.stockStatus !== 'all' ? 1 : 0) +
+    (filters.priceRange !== 'all' ? 1 : 0) +
     (filters.flag ? 1 : 0) +
     (filters.sort !== 'recent' ? 1 : 0);
 

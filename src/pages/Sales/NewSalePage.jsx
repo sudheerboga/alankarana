@@ -5,17 +5,21 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   Box, Card, Typography, Stack, TextField, Button, InputAdornment, MenuItem, Divider,
 } from '@mui/material';
-import { CurrencyRupeeRounded, PointOfSaleRounded } from '@mui/icons-material';
+import { CurrencyRupeeRounded, PointOfSaleRounded, QrCodeScannerRounded } from '@mui/icons-material';
+import BarcodeScanner from '../../components/common/BarcodeScanner';
 import { motion } from 'framer-motion';
 import TopBar from '../../components/layout/TopBar';
 import ItemPicker from '../../modules/sales/ItemPicker';
 import { useMutation } from '../../hooks/useMutation';
+import { useDoc } from '../../hooks/useDoc';
 import { useUnsavedChangesGuard } from '../../hooks/useUnsavedChangesGuard';
 import { recordSale } from '../../services/salesService';
+import { findItemByBarcode } from '../../services/inventoryService';
 import { selectUser } from '../../store/slices/authSlice';
+import { pushToast } from '../../store/slices/uiSlice';
 import { useTheme } from '../../theme/ThemeProvider';
 import { formatINR, computeSaleProfit, toNumber } from '../../utils/format';
-import { ROUTES, PAYMENT_TYPES } from '../../constants';
+import { ROUTES, PAYMENT_TYPES, COLLECTIONS } from '../../constants';
 
 const NewSalePage = () => {
   const navigate = useNavigate();
@@ -26,9 +30,21 @@ const NewSalePage = () => {
 
   // Selected item full record (kept in state so we have access to costPerPiece etc.)
   const [selectedItem, setSelectedItem] = useState(null);
+  const [scannerOpen, setScannerOpen] = useState(false);
 
   // Preselect via ?itemId=... (from item detail page's "Record a sale" button)
   const presetItemId = searchParams.get('itemId');
+
+  // Fetch the preset item so we can populate selectedItem (handleItemChange is only
+  // called on user interaction, not on form defaultValues initialization).
+  const { item: presetItem } = useDoc(COLLECTIONS.INVENTORY, presetItemId);
+  useEffect(() => {
+    if (presetItem && !selectedItem) {
+      setSelectedItem(presetItem);
+      setValue('actualSellingPrice', presetItem.sellingPricePerPiece || '');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [presetItem]);
 
   const {
     control,
@@ -59,6 +75,24 @@ const NewSalePage = () => {
     setValue('itemId', id, { shouldValidate: true });
     if (item) {
       setValue('actualSellingPrice', item.sellingPricePerPiece || '');
+    }
+  };
+
+  const handleBarcodeScan = async (code) => {
+    setScannerOpen(false);
+    try {
+      const item = await findItemByBarcode(code);
+      if (!item) {
+        dispatch(pushToast({ message: 'No item found for that barcode', severity: 'warning' }));
+        return;
+      }
+      if ((item.remainingPieces ?? 0) <= 0) {
+        dispatch(pushToast({ message: `${item.itemName} is out of stock`, severity: 'warning' }));
+        return;
+      }
+      handleItemChange(item.id, item);
+    } catch (_err) {
+      dispatch(pushToast({ message: 'Could not look up item', severity: 'error' }));
     }
   };
 
@@ -99,9 +133,19 @@ const NewSalePage = () => {
           <Stack spacing={2}>
             {/* Item picker */}
             <Card sx={{ p: 2 }}>
-              <Typography sx={{ fontSize: 13, fontWeight: 600, color: colors.textSecondary, mb: 1.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Item
-              </Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+                <Typography sx={{ fontSize: 13, fontWeight: 600, color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Item
+                </Typography>
+                <Button
+                  size="small"
+                  startIcon={<QrCodeScannerRounded sx={{ fontSize: 16 }} />}
+                  onClick={() => setScannerOpen(true)}
+                  sx={{ fontSize: 12, fontWeight: 600, color: colors.primary, minWidth: 0, px: 1, py: 0.5 }}
+                >
+                  Scan
+                </Button>
+              </Box>
               <Controller
                 name="itemId"
                 control={control}
@@ -112,6 +156,12 @@ const NewSalePage = () => {
                     onChange={handleItemChange}
                   />
                 )}
+              />
+
+              <BarcodeScanner
+                open={scannerOpen}
+                onScan={handleBarcodeScan}
+                onClose={() => setScannerOpen(false)}
               />
               {errors.itemId && (
                 <Typography sx={{ fontSize: 12, color: colors.danger, mt: 0.75 }}>
@@ -189,7 +239,7 @@ const NewSalePage = () => {
                   />
                 </Box>
 
-                <Controller
+                {/* <Controller
                   name="discount"
                   control={control}
                   render={({ field }) => (
@@ -204,7 +254,7 @@ const NewSalePage = () => {
                       inputProps={{ inputMode: 'decimal', min: 0, step: 1 }}
                     />
                   )}
-                />
+                /> */}
 
                 {/* Live preview */}
                 {previewProfit && (

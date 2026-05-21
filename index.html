@@ -11,7 +11,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Alankarana" />
-    <meta name="description" content="Boutique sales &amp; inventory management" />
+    <meta name="description" content="alankarana sales &amp; inventory management" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -31,39 +31,11 @@
         overscroll-behavior-y: contain;
         font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
       }
-      .app-splash {
-        position: fixed; inset: 0;
-        display: flex; align-items: center; justify-content: center;
-        flex-direction: column; gap: 24px;
-        background: #FAFAF7;
-        z-index: 9999;
-      }
-      .app-splash h1 {
-        font-family: 'Inter', sans-serif;
-        font-size: 28px;
-        font-weight: 700;
-        color: #16161A;
-        margin: 0;
-        letter-spacing: -0.04em;
-      }
-      .app-splash .dot {
-        width: 6px; height: 6px; border-radius: 50%;
-        background: #8B1A3A;
-        animation: pulse 1.4s infinite ease-in-out;
-      }
-      @keyframes pulse {
-        0%, 100% { opacity: 0.3; transform: scale(0.7); }
-        50% { opacity: 1; transform: scale(1); }
-      }
+      /* blank before React loads — #FAFAF7 body bg prevents white flash */
     </style>
   </head>
   <body>
-    <div id="root">
-      <div class="app-splash">
-        <h1>Alankarana</h1>
-        <div class="dot"></div>
-      </div>
-    </div>
+    <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

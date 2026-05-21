@@ -3,6 +3,7 @@ import {
   update as fbUpdate,
   remove as fbRemove,
   getOne as fbGetOne,
+  getMany as fbGetMany,
   serverTimestamp,
 } from '../firebase/firestore';
 import { generateItemCode } from '../utils/itemCode';
@@ -44,6 +45,13 @@ export const buildInventoryDoc = (input, { isNew = true, existing = null } = {})
     // Firestore doesn't have full-text search; we use these for "starts-with" matches
     // and filter the rest client-side over the small dataset.
     itemNameLower: (input.itemName || '').trim().toLowerCase(),
+
+    // Optional supplier/external barcode. Stored as-is for camera scan lookup.
+    // null means not set — never stored as empty string to keep equality queries clean.
+    barcode: (input.barcode || '').trim() || null,
+
+    // User-editable intake date — distinct from createdAt (server timestamp).
+    purchaseDate: input.purchaseDate ? new Date(input.purchaseDate) : null,
   };
 
   // Item code: generated on create; preserved on edit (codes are stable identifiers)
@@ -104,6 +112,29 @@ export const duplicateItem = async (id) => {
   );
   const newId = await fbCreate(COLLECTIONS.INVENTORY, doc);
   return { id: newId, ...doc };
+};
+
+/**
+ * Look up an inventory item by a scanned barcode value.
+ * Checks the `barcode` field first (supplier barcode stored during intake),
+ * then falls back to `itemCode` (auto-generated code printed on price tags).
+ * Returns the first match or null.
+ */
+export const findItemByBarcode = async (code) => {
+  const trimmed = (code || '').trim();
+  if (!trimmed) return null;
+
+  const byBarcode = await fbGetMany(COLLECTIONS.INVENTORY, {
+    where: [['barcode', '==', trimmed]],
+    limit: 1,
+  });
+  if (byBarcode.length) return byBarcode[0];
+
+  const byCode = await fbGetMany(COLLECTIONS.INVENTORY, {
+    where: [['itemCode', '==', trimmed]],
+    limit: 1,
+  });
+  return byCode[0] || null;
 };
 
 export { serverTimestamp };
