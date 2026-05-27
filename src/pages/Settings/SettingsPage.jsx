@@ -55,7 +55,7 @@ const SettingsPage = () => {
     }));
   };
 
-  const displayName = user?.displayName || user?.phoneNumber || user?.email || 'User';
+  const displayName = user?.displayName || user?.email || 'User';
 
   return (
     <Box sx={{ pb: 10 }}>

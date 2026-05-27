@@ -1,6 +1,8 @@
 {
   "projects": {
-    "staging": "alankarana-8685c"
+    "staging": "fir-apps-3cb3d",
+    "production": "alankarana-sales-maanagement",
+    "default": "alankarana-sales-maanagement"
   },
   "targets": {},
   "etags": {}

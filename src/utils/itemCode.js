@@ -1,70 +1,49 @@
 /**
  * Item Code Generator
  *
- * Format: A-DDMMYY-OP-SP-XXXX
- * Example: A-190526-1200-1800-8F2K
+ * Format: A{SP}{encodedCP}-XXXX
+ * Example: A499bd0-ABCD
  *
- * - A      = Alankarana brand prefix
- * - DDMMYY = item added date
- * - OP     = original (cost) price, padded with one alphanumeric on each side
- * - SP     = selling price, padded with one alphanumeric on each side
- * - XXXX   = random 4-char unique identifier (uppercase, no ambiguous chars)
+ * - A        = Alankarana brand prefix
+ * - SP       = selling price (plain digits)
+ * - encodedCP= cost price with digits 1-9 replaced by a-i, 0 stays as 0
+ * - XXXX     = 4 random uppercase alphabets
  *
- * The padding around prices is a "soft obfuscation" — staff can't read a price
- * just by glancing at a code, but staff trained on the format can. Avoid 0/O/1/I.
+ * Encoding: 1→a, 2→b, 3→c, 4→d, 5→e, 6→f, 7→g, 8→h, 9→i, 0→0
+ * Example: cost 240 → "bd0"
  */
 
-import dayjs from 'dayjs';
+const ALPHA_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const randAlpha = () => ALPHA_CHARS[Math.floor(Math.random() * ALPHA_CHARS.length)];
+const randAlphaSegment = (len) => Array.from({ length: len }, randAlpha).join('');
 
-const RAND_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // No 0/O/1/I/L
-
-const randChar = () => RAND_CHARS[Math.floor(Math.random() * RAND_CHARS.length)];
-const randSegment = (len) => Array.from({ length: len }, randChar).join('');
-
-const formatDate = (date) => dayjs(date).format('DDMMYY');
-
-/**
- * Pad a numeric price with one random alphanumeric on each side.
- * 1200 → "X1200K" — keeps the number readable to humans but not the raw integer.
- */
-const padPrice = (price) => {
-  const n = Math.round(Number(price) || 0);
-  return `${randChar()}${n}${randChar()}`;
+const encodeCost = (price) => {
+  const n = Math.round(Number(price) || 0).toString();
+  return n.replace(/[1-9]/g, (d) => String.fromCharCode(96 + Number(d)));
 };
 
-export const generateItemCode = ({ costPerPiece, sellingPricePerPiece, date = new Date() }) => {
-  const datePart = formatDate(date);
-  const op = padPrice(costPerPiece);
-  const sp = padPrice(sellingPricePerPiece);
-  const unique = randSegment(4);
-  return `A-${datePart}-${op}-${sp}-${unique}`;
+const decodeCost = (encoded) =>
+  Number(encoded.replace(/[a-i]/g, (l) => String(l.charCodeAt(0) - 96)));
+
+export const generateItemCode = ({ costPerPiece, sellingPricePerPiece }) => {
+  const sp = Math.round(Number(sellingPricePerPiece) || 0);
+  const encoded = encodeCost(costPerPiece);
+  const unique = randAlphaSegment(4);
+  return `A${sp}${encoded}-${unique}`;
 };
 
-/**
- * Parse a code back into its parts — useful for diagnostics, but never trust
- * the parsed price over the Firestore record.
- */
 export const parseItemCode = (code) => {
   if (typeof code !== 'string') return null;
-  const parts = code.split('-');
-  if (parts.length !== 5 || parts[0] !== 'A') return null;
-  const [, datePart, opPart, spPart, unique] = parts;
-
-  const extractPrice = (p) => {
-    const m = p.match(/^[A-Z0-9](\d+)[A-Z0-9]$/);
-    return m ? Number(m[1]) : null;
-  };
-
+  // Selling price = leading digits; encoded cost starts at first letter [a-i]
+  const m = code.match(/^A(\d+)([a-i][a-i0]*)-([A-Z]{4})$/);
+  if (!m) return null;
+  const [, spStr, encodedCost, unique] = m;
   return {
     brand: 'A',
-    date: dayjs(datePart, 'DDMMYY').toDate(),
-    costPerPiece: extractPrice(opPart),
-    sellingPricePerPiece: extractPrice(spPart),
+    sellingPricePerPiece: Number(spStr),
+    costPerPiece: decodeCost(encodedCost),
     unique,
   };
 };
 
-/**
- * Validate the format without parsing — fast check for search input.
- */
-export const isValidItemCode = (code) => /^A-\d{6}-[A-Z0-9]\d+[A-Z0-9]-[A-Z0-9]\d+[A-Z0-9]-[A-Z0-9]{4}$/.test(code);
+export const isValidItemCode = (code) => /^A\d+[a-i][a-i0]*-[A-Z]{4}$/.test(code);

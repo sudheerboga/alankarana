@@ -34,6 +34,23 @@ npm run build
 ```bash
 npm run build && firebase deploy
 
+# 1. Install Firebase CLI
+npm install -g firebase-tools
+
+# 2. Login
+firebase login
+
+# 3. Init project (run inside your project folder)
+firebase init
+
+# 4. Select your project
+firebase use alankarana-sales-maanagement
+
+# 5. Deploy rules
+
+firebase deploy --only storage
+
+
 ## Project Structure
 
 ```

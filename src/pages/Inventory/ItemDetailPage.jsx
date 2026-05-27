@@ -248,16 +248,17 @@ const ItemDetailPage = () => {
                 },
               }}
             >
-              <Typography
+              <Chip
+                label={item.itemCode}
+                size="small"
                 sx={{
-                  fontSize: 12,
                   fontFamily: typography.fontMono,
-                  color: colors.textMuted,
-                  letterSpacing: '0.02em',
+                  fontSize: 12,
+                  letterSpacing: '0.04em',
+                  height: 22,
+                  borderRadius: 1,
                 }}
-              >
-                {item.itemCode}
-              </Typography>
+              />
               <IconButton
                 size="small"
                 onClick={handleCopyCode}

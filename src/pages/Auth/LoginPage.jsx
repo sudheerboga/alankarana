@@ -166,7 +166,7 @@ const LoginPage = () => {
             sx={{ width: '100%', borderBottom: `1px solid ${colors.border}` }}
           >
             <Tab label="Phone" icon={<PhoneRounded fontSize="small" />} iconPosition="start" />
-            <Tab label="Email" icon={<EmailRounded fontSize="small" />} iconPosition="start" />
+            {/* <Tab label="Email" icon={<EmailRounded fontSize="small" />} iconPosition="start" /> */}
           </Tabs>
 
           {tab === 0 && (

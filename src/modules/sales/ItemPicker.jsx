@@ -1,10 +1,12 @@
 import { useState, useMemo } from 'react';
 import { Autocomplete, TextField, Box, Typography, Chip } from '@mui/material';
 import { Inventory2Outlined } from '@mui/icons-material';
+import { useSelector } from 'react-redux';
 import { useCollection } from '../../hooks/useCollection';
 import { useTheme } from '../../theme/ThemeProvider';
 import { formatINR } from '../../utils/format';
 import { COLLECTIONS } from '../../constants';
+import { selectCategories } from '../../store/slices/categoriesSlice';
 
 /**
  * Item picker — search inventory by name OR code. Only shows in-stock items by default.
@@ -14,6 +16,11 @@ import { COLLECTIONS } from '../../constants';
 const ItemPicker = ({ value, onChange, label = 'Item', disabled, includeOutOfStock = false }) => {
   const { colors, typography } = useTheme();
   const { items, loading } = useCollection(COLLECTIONS.INVENTORY, { orderBy: [['itemName', 'asc']] });
+  const allCategories = useSelector(selectCategories);
+  const categoryMap = useMemo(
+    () => Object.fromEntries(allCategories.map((c) => [c.id, c])),
+    [allCategories]
+  );
 
   const options = useMemo(
     () => (includeOutOfStock ? items : items.filter((i) => (i.remainingPieces ?? 0) > 0)),
@@ -62,9 +69,17 @@ const ItemPicker = ({ value, onChange, label = 'Item', disabled, includeOutOfSto
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               color: colors.textMuted,
               flexShrink: 0,
+              overflow: 'hidden',
+              backgroundImage: item.images?.[0]?.url ? `url(${item.images[0].url})` : 'none',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
             }}
           >
-            <Inventory2Outlined fontSize="small" />
+            {!item.images?.[0]?.url && (
+              categoryMap[item.category]?.icon
+                ? <Box component="span" sx={{ fontSize: 22, lineHeight: 1, userSelect: 'none' }}>{categoryMap[item.category].icon}</Box>
+                : <Inventory2Outlined fontSize="small" />
+            )}
           </Box>
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography sx={{ fontSize: 14, fontWeight: 600, color: colors.text }}>

@@ -77,22 +77,22 @@ const DashboardPage = () => {
     <Box>
       <TopBar
         title="Alankarana"
-        actions={
-          <Avatar
-            onClick={() => navigate(ROUTES.SETTINGS)}
-            sx={{
-              width: 36, height: 36,
-              bgcolor: colors.surfaceAlt,
-              color: colors.text,
-              fontSize: 13,
-              fontWeight: 600,
-              cursor: 'pointer',
-              border: `1px solid ${colors.border}`,
-            }}
-          >
-            {initials(displayName)}
-          </Avatar>
-        }
+        // actions={
+        //   <Avatar
+        //     onClick={() => navigate(ROUTES.SETTINGS)}
+        //     sx={{
+        //       width: 36, height: 36,
+        //       bgcolor: colors.surfaceAlt,
+        //       color: colors.text,
+        //       fontSize: 13,
+        //       fontWeight: 600,
+        //       cursor: 'pointer',
+        //       border: `1px solid ${colors.border}`,
+        //     }}
+        //   >
+        //     {initials(displayName)}
+        //   </Avatar>
+        // }
       />
 
       <Box sx={{ px: 2, pb: 12 }}>
